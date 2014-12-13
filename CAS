@@ -1,0 +1,2076 @@
+{
+ "metadata": {
+  "name": "",
+  "signature": "sha256:31d3899873384cadc1fd3f08f56bffd55e5c105ccb9e98ccd60bde003bc250f0"
+ },
+ "nbformat": 3,
+ "nbformat_minor": 0,
+ "worksheets": [
+  {
+   "cells": [
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h1>Exploring Symbolic Python</h1>\n",
+      "<p>If you're like me, you've probably found that there can be a disconect when translating the mathematics learned in school with algorithms implemented in programming languages.  For example, on paper find the derivative of $3x^2 + 2$ is nearly trivial, while trying to do so from scratch in python is much more involved.  Consider also simplifying $\\sqrt{12}$, where a human would represent it as $2\\sqrt{3}$, a computer will give a much uglier approximation.  In order to bridge the gap, computer algebra systems evaluate expressions symbolically, in the same way a human would.  Python's CAS SymPy not only allows us to solve mathematical expressions symbolically, but to then incorporate the solutions into code with ease</p>"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "from sympy import *\n",
+      "from __future__ import division\n",
+      "init_printing(use_unicode=True)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 1
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "The basic SymPy object is a symbol, and is intialized with either `Symbol` or `symbols()`, taking a string representing its name."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x = Symbol('x')\n",
+      "type(x)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "metadata": {},
+       "output_type": "pyout",
+       "prompt_number": 52,
+       "text": [
+        "sympy.core.symbol.Symbol"
+       ]
+      }
+     ],
+     "prompt_number": 52
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Note that the name of the symbol object and the variable holding it need not be related."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "y = Symbol('z')\n",
+      "y"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$z$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAJBAMAAAD5iKAgAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMARN3vMmYQu3aZqyJU\nic384Ct+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAN0lEQVQIHWNgYFQWcGVgSO+YuYCBIYFhFwMQ\nsACZDAySIIJnAog8ycCwgIFF9WqfAAMnQ/BDBgDrfAlXaH5hBAAAAABJRU5ErkJggg==\n",
+       "prompt_number": 53,
+       "text": [
+        "z"
+       ]
+      }
+     ],
+     "prompt_number": 53
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Symbols can then be combined with normal python syntax to form an expression.  expressions are composed of nested objects, including multiplication ( `Mul()`), addition (`Add()`), power ( `Pow()`), but not subtraction or divison.  For example, the expression $x - y$ would be represented as `Add(x, Mul(-1, y))`."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x, y, z = symbols('x, y, z')\n",
+      "expression = 2*x + y**2 + z/2\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$2 x + y^{2} + \\frac{z}{2}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGoAAAAlBAMAAABYAWEdAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIpm7MhCriUTv3c12\nVGZoascqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB6UlEQVQ4EZ2TsUsbURzHv5fcmUtIzM1ORwUX\nHYJipwyZOrh4k46mQxFUUAKli2AGoSCuBa39Dyok4CINxRAQERxaoYODkE0QkQiKIrbne3fv9d79\n7jCcv+F+7/v5/b7ce8MXSFobW3o3qQdGuTOS2AQDWrWfqzbuRFbeRQgBGWugSRBMmxKqc5Z+Q9kp\nBRGdrWsPBBZsDBAUlYU7wqYurvYJispcmzB7cKcOaG8mKmSgypoqgvMMMvTqwRCDtiKU4wdgW5Ew\nLFV9xrovwxhfgeWKslhoK0L/eT7pyxAGDpwXXFnX7cW6GGw4xsn7zdXweHYM2hcf8S/5F2DeYxaX\n7e9h18oZ8uI/sa5cCR+x5vwOubRfo0iXfBTrGgYc7MkFcRUD31BsSxjcsOjyAvJVPnvyFjKt1o+d\nVstmwrzDdMWDgIIFwSk0C/oti5tX8tmpJo7lCusSC6TbyFt/2MMPfSDH6SreihXeJBZo6FNtwfyb\n7mldH8hxqmT+Eyu8SSzQges+GkuHR9dCy7Ex31EDKbHYoi0Ys5cF9R/HZ8Ts+quLmKsHJkiMlzOy\ni7JiCo40I8GEnzY7Fd4iRTMSWYgFNCOxS3Gw4cTRPoxl5BXFMvKKYhlJXn5Gkvq8jCQ1eRlJagLP\nSGITeEbwDMvoeN/hTPd+AAAAAElFTkSuQmCC\n",
+       "prompt_number": 260,
+       "text": [
+        "       2   z\n",
+        "2\u22c5x + y  + \u2500\n",
+        "           2"
+       ]
+      }
+     ],
+     "prompt_number": 260
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "srepr(expression)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "metadata": {},
+       "output_type": "pyout",
+       "prompt_number": 261,
+       "text": [
+        "\"Add(Mul(Integer(2), Symbol('x')), Pow(Symbol('y'), Integer(2)), Mul(Rational(1, 2), Symbol('z')))\""
+       ]
+      }
+     ],
+     "prompt_number": 261
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Expressions can also be composed of sympy functions and numbers.  Here we can see that sympy simplifies the square root in the same manner a human would."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = sqrt(12)\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$2 \\sqrt{3}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAACUAAAAVBAMAAAAzyjqdAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIpm7MhCriUTv3c12\nVGZoascqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABAElEQVQYGWWOvUrDUBiGn7RW23hsXUTQJdRZ\nCLi4CLkDMzm41MXFpeJSFJTi5A0Iapcszv7cgF6AoHgDzeZqC6IINb7nNGAlH+R9v+c5nENgYrzM\nzvuEgenuP3SwXFSsFl0lKbrSS+685lqUr9uw2NkQbDHzlbsTvIB+CrtwOXaVBDOikcAVtCMnTUr1\ngtYtPMTWncn67sTe1dzEpqd6cnDvsvrJwnMXEtHUUaDUnRBaIfV9R4eRrRV9pQF+bIHaucLsKLwh\nb7bmKY/Ur3ajHV9rb3xQ/tGrAUZu8ziQq4X4A1jqHOyJZnv2uXpK/1H/nGXformhAk6b667Hcfe3\n/wJ2yjj3MDwWbQAAAABJRU5ErkJggg==\n",
+       "prompt_number": 257,
+       "text": [
+        "    ___\n",
+        "2\u22c5\u2572\u2571 3 "
+       ]
+      }
+     ],
+     "prompt_number": 257
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "srepr(expression)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "metadata": {},
+       "output_type": "pyout",
+       "prompt_number": 259,
+       "text": [
+        "'Mul(Integer(2), Pow(Integer(3), Rational(1, 2)))'"
+       ]
+      }
+     ],
+     "prompt_number": 259
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "The expression is evaluated in the following way:\n",
+      "\n",
+      "`1 : Pow(12, Rational(1, 2))`\n",
+      "\n",
+      "`2 : Pow(Mul(4, 3), Rational(1, 2))`\n",
+      "\n",
+      "`3 : Mul(Pow(4, Rational(1, 2)), Pow(3, Rational(1, 2)))`\n",
+      "\n",
+      "`4 : Mul(2, Pow(3, Rational(1, 2)))`"
+     ]
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      " Sympy can also provide numerical solutions, either using `evalf()` on expressions above or `subs(variable ,value)` to substitute into an equation.  Multiple substitution can be done by passing a list of the form [(variable, value)]"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.evalf(100)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$3.464101615137754587054892683011744733885610507620761256111613958903866033817600074162292373514497151$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "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\n",
+       "prompt_number": 56,
+       "text": [
+        "3.4641016151377545870548926830117447338856105076207612561116139589038660338176\n",
+        "00074162292373514497151"
+       ]
+      }
+     ],
+     "prompt_number": 56
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = 2*x + x**2\n",
+      "expression.subs(x, 2)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$8$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAOBAMAAADkjZCYAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHaJmUSrVGYizbvd\nMu8FnLUeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAWklEQVQIHWNgEFJ2ZWBgcGBgK2Bgb2DgXMDA\nvIGB8QAD628B5gYGhvwfFkBZlv8LgWTLrX8BDBwJDP0PGfgEGHi/M8gDBTMY+CYwMOxkYF3IwKHA\nwHDN2ZUBAOZLEltqTqBiAAAAAElFTkSuQmCC\n",
+       "prompt_number": 57,
+       "text": [
+        "8"
+       ]
+      }
+     ],
+     "prompt_number": 57
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = 2*x + 4*y + 1\n",
+      "expression.subs([(x, 1),(y, 4)])"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$19$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAABMAAAAPBAMAAAD0aukfAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAzRAiu5mrdu/dZolE\nVDLjuNgcAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAd0lEQVQIHWNgYBBiYGCKLjVgYGAw+cTAoLGA\nuZmBQSUMyMxgYEgBirIDmR8ZGPYrgJlMXxgY6g9ARBuBogsgzP0MDPIFECZjAS9MlGF53f4LEFGg\nQfkQE4AsBjEgBpm7woDvM5RZqKC4gIGBNeNnFgN3qA9QEAEAYgIhi6UxAJwAAAAASUVORK5CYII=\n",
+       "prompt_number": 58,
+       "text": [
+        "19"
+       ]
+      }
+     ],
+     "prompt_number": 58
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Expressions are immutable, so expression methods return a new expression instead of modifying the old in place.  Additionally this means they can be used as keys to a dictionary."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$2 x + 4 y + 1$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGcAAAASBAMAAAC0gN24AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIpm7MhCriUTv3c12\nVGZoascqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABfElEQVQoFX2SO0sDQRSFzyYZdjUJSW0VFGy0\nWBSshOw/cG1MaSyMoEKCIBYK+gOCnYIPsBMkgqKdU2QJBAkIPtBCsFhbBYngC1HjJLOPTJhkmpl7\nzv3mzr0MlN5hA9IVSkjlsAlMQP2SmujWZbqSZNA0sNVskrgbVQRonMtkKMugbSBruHlsj1pOoDwL\n0IObc8mgotkGUsPtIXbBkUkupvIr/Cqv0iODUoNQNrguVAK0T6TwZBVEiFgMyt0jUpVCbEqLWDWv\nRUhFWFeuBhB0HtlSqQ8wccoRfxC3DCLYRcySVYqk6+pPw1IpPduhNAGQHIOgvWPMYM4ypQeUnjRy\n6tPDDZQ4Qm8gDckdeTSTyW5agWNUuAzheeyzROJ3rN2yALGgS0cwjREui1DP0sKs9husKjZ3vZEj\npiOga38yqFirfZP58vmLY3qQmvywyUzptQXq39u3HcnfPIhLrCu+vJ78VP+k2f4Zc5hcc8L1Jrnz\n8RCjnRNkbr5kyOR/WUFrZdi3t68AAAAASUVORK5CYII=\n",
+       "prompt_number": 59,
+       "text": [
+        "2\u22c5x + 4\u22c5y + 1"
+       ]
+      }
+     ],
+     "prompt_number": 59
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "SymPy can easily be utilized in larger python projects.  For instance, strings can be read into expressions and symbols using the function `sympify()` and sympify expressions can be converted to other namespaces (such as numpy) using `lambdify`."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "string = \"x**2 + 2*x + 1\"\n",
+      "expression = sympify(string)\n",
+      "expression, type(expression)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "metadata": {},
+       "output_type": "pyout",
+       "prompt_number": 60,
+       "text": [
+        "(x**2 + 2*x + 1, sympy.core.add.Add)"
+       ]
+      }
+     ],
+     "prompt_number": 60
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "import numpy\n",
+      "expression = x**2 + 2*x + sin(2*x) + 1\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x^{2} + 2 x + \\sin{\\left (2 x \\right )} + 1$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAMQAAAAZBAMAAACcKJypAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACrklEQVRIDbVVTWgTQRh9m242m2Qbl1a8FGSb\nSg5ebEWoB9E9KAoFCR7qRbT2oPQQFBH1oBDEixeNN9cijSIeFCWiFylqsAcRBAMexYt40IOSqq1F\nxXVmZ2b32/yAqJnD7Pu+9+a9zMwmAcQoPbIl6tXDcPsqvfKWvqZrfe1xRK6oL/U4Asgs9jzCdP4u\n4hlddpoWbbjU0tHfzNdbWqq03ioE6DUQZV/7kkuhNtUIoQCDMLrdjrUcadM2qLLttZyIzn8S+8Q6\nzRXPMeBT5ASspkWECwBVsjIYymXoVRhhXbl1T5AZRzzfA9vqAgbzdYIJfAdQ5VpJKRckwoic7zcF\nq8g5u2uE/iLMSJYBqkxX4y4iYmBkR8ERBJ9VBIMXbS2/ac+04OQurPX5ysQXPP/4dMRhhCGuMFTK\nOnLhu9CmUmdNcktRRHIZa3DKOR+LGALKuA/MOjr/Ocge5WykTEmn0IVHGLaxmHG5UIyQhFnDQRyx\nb4i+3MV+G1M84jHwjRFmlbORMlPmNTmLYBdI10RbzFHEa8DGrOJkhPljHXjEQ+Azo3JFzkdKqyn0\noYu47lWOaLPZ8LzLHzyvwRuJUT5zH2DG8y543lWGtBm/wSPmSQRRBhExl+CNellnnzYcYf4d6C6s\nn9AEJXexHaklEhEcFFHyN4yP0IXvImNvQKJDhNVAwr2WaGI4WAMZcRMYJxH8uqmy43UfqD7BTuES\nzCp/16HS5uT3bFNnJnzIiLs2HvBTkgdljAJU2d8QauUSfC8G8wOHpUvAKnLO91e0jcOFk2KNipg8\ndqK44I8t+Ftu/2L2wVePKNPFeET/1pVxaRA9VETUEUjuorV9Lt7YLctuLgGdpFsi6/cSTOAZghmc\nlmU3l7j6z6qsS3VahVb/CbO/JDLigYT4J0jfRhzvZPUboQy3yOgRZ3gAAAAASUVORK5CYII=\n",
+       "prompt_number": 61,
+       "text": [
+        " 2                     \n",
+        "x  + 2\u22c5x + sin(2\u22c5x) + 1"
+       ]
+      }
+     ],
+     "prompt_number": 61
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "f = lambdify(x, expression, \"numpy\")\n",
+      "f"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "metadata": {},
+       "output_type": "pyout",
+       "prompt_number": 62,
+       "text": [
+        "<function numpy.<lambda>>"
+       ]
+      }
+     ],
+     "prompt_number": 62
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "f(2)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$8.24319750469$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAIAAAAAPBAMAAADe9tr1AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHaJmUSrVGYizbvd\nMu8FnLUeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACdElEQVQoFaWTy2tTURDGfzfPm5v25lJduTDR\nloIbDY2I+Az0AdpFu3DfIKUUQRoQ3CYLF65sRBe6Kam6KBQh4AtBMSAUtJuA4kKEpgtBLWKjVqvF\nxu/cG/8CB8KZme+7X2bmzIGe3mGMXR99ao7XcC33SI7jwc6BU/BuMpfLOnu6h7EG+xodDrneRgCT\nJ1ZU1ipwclznMok8pTKJZx7WB+YqzLbb7YLbbmdwitYLI7AMu8Yj1QCOi1tVMubhNiG0Rugnqbp1\nf8Yj1iRWQ0XEcA7tgytwRFRxuE2yFsDhGlZdWbdO7A/cWCT6nnQVDnikqoRbZOG4JGQPoeT5HPuX\nwgCObnnhsiKn5QtkF+WbFoxAukZoQ2E0Ewj8gAm1K06yqXQHntk8rMBYVwu74gvcUSQBVxVsyk2q\nict9Deu7BDI+J3V3YPgfHGnPm69lE1l6kED3sbwiCYTXcb7K1T8kvcRG4husBJz0Am6xA196u22m\nL1tWdUYATjR8AW5xQRVY6ybHk46A4aRbRFYD2C4wu+oTIjXijUDAVUYVYO999VNTr/r42FVVMJHx\nOak69kYAux7dIsn6YQcSSFRIKmME1HtLs6nBObQmmkGp6HPcKraZjuC0jmlDjee5eXFqavtsqkVS\nYCDgFDRt/T7BmKceZz2fo1tQBbq7Am4FHss1O6xdYQ23RpeuWQL2R1YEr+TRvvKS/XBaFHHimkEz\ngKPz2BnrN4nnuZG6wC3sMqWMLxCatxaUKuX1UoxaV9H6rFgc7rG72IHfDOoxLeFo4+twtD3NmaEH\nMPJlqczB0XHx54qQGJzU2xjobyg2nPDQeTqwMv9jfwGRgsoEciyDIQAAAABJRU5ErkJggg==\n",
+       "prompt_number": 63,
+       "text": [
+        "8.24319750469"
+       ]
+      }
+     ],
+     "prompt_number": 63
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h2>Plotting Functions</h2>\n",
+      "Using lambdify, numpy, and matplotlib you can easily plot functions from SymPy expressions."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "import matplotlib.pyplot as plt\n",
+      "import numpy\n",
+      "%matplotlib inline"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 37
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "For instance, below we plot an expression and its derivative.  First define the functions in SymPy, then use lambdify to translate them into NumPy."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x = symbols('x')\n",
+      "expression = x**2 + 1\n",
+      "derivative = expression.diff(x)\n",
+      "f = lambdify(x, expression, \"numpy\")\n",
+      "df = lambdify(x, derivative, \"numpy\")"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 48
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Then specify a domain with the numpy function `numpy.linspace(min, max, steps)`.  You can now specify the x and y arguments in the `plot()` function with `domain, map(function, domain)`."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "domain = numpy.linspace(-10, 10, 100)\n",
+      "plt.plot(domain, map(f, domain))\n",
+      "plt.plot(domain, map(df, domain))\n",
+      "plt.show()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "metadata": {},
+       "output_type": "display_data",
+       "png": "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\n",
+       "text": [
+        "<matplotlib.figure.Figure at 0xb92a978>"
+       ]
+      }
+     ],
+     "prompt_number": 51
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 52
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h1>Simplification</h1>\n",
+      "Sympy has several different methods for simplifying expressions, varying in degree of specificity.  The most general simplification method is `simplify()`.  It applies to any sort of expression, but it is not guaranteed to give the simpliest answer.  If a more specific simplification method is known, it should be used instead."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = x**2 + 2*x + 1\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x^{2} + 2 x + 1$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGgAAAAWBAMAAADeGsQjAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABa0lEQVQ4EWNggIDcvQJQFvEUmwPzBOJVQ1Vy\nOPB8IVkTXwDLV5I1MTBwfSRDE4cCGZpy0fSw3N19AE0Iyp0IF2a/AGdCGMIMbNh96Y3wRxhDDEQx\nowOENmRgeAdhoYpLX4Zr4pm1aiNEkksBQr9gYLA/AGGCSZg4AxNcE9///x8gKmCS8wXwaRJSdlVT\nQBgJ0wQU6RdgVDIJSkI1DGwTYwJ7EwdSEkJoYv3GIMZQodCJRRObANtHLgeIBIhEaOLYwJDIkC+w\nBCIHFwf5iZGBcwNCC7Km2wwMAgyzYXIomhgY+BVgEgxsM2fOeDlzJjjOmAxAwp/Aciji4NA7fwBo\nIhzATVzLwOLAwPMH6BQwgIuDnMcloM/AhEUTzwUGJoeFTB8YFLFoil+wn8EdIo5iokdargXrL+4P\nLAVYNAkrCaVDxVE0zf///wejkaJaOdRAmPN47X6YQ4UQFEwSIQJh4RIHy7IiW4ukE1kcAEJLUX2t\n8S2aAAAAAElFTkSuQmCC\n",
+       "prompt_number": 98,
+       "text": [
+        " 2          \n",
+        "x  + 2\u22c5x + 1"
+       ]
+      }
+     ],
+     "prompt_number": 98
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.simplify()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x^{2} + 2 x + 1$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGgAAAAWBAMAAADeGsQjAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABa0lEQVQ4EWNggIDcvQJQFvEUmwPzBOJVQ1Vy\nOPB8IVkTXwDLV5I1MTBwfSRDE4cCGZpy0fSw3N19AE0Iyp0IF2a/AGdCGMIMbNh96Y3wRxhDDEQx\nowOENmRgeAdhoYpLX4Zr4pm1aiNEkksBQr9gYLA/AGGCSZg4AxNcE9///x8gKmCS8wXwaRJSdlVT\nQBgJ0wQU6RdgVDIJSkI1DGwTYwJ7EwdSEkJoYv3GIMZQodCJRRObANtHLgeIBIhEaOLYwJDIkC+w\nBCIHFwf5iZGBcwNCC7Km2wwMAgyzYXIomhgY+BVgEgxsM2fOeDlzJjjOmAxAwp/Aciji4NA7fwBo\nIhzATVzLwOLAwPMH6BQwgIuDnMcloM/AhEUTzwUGJoeFTB8YFLFoil+wn8EdIo5iokdargXrL+4P\nLAVYNAkrCaVDxVE0zf///wejkaJaOdRAmPN47X6YQ4UQFEwSIQJh4RIHy7IiW4ukE1kcAEJLUX2t\n8S2aAAAAAElFTkSuQmCC\n",
+       "prompt_number": 99,
+       "text": [
+        " 2          \n",
+        "x  + 2\u22c5x + 1"
+       ]
+      }
+     ],
+     "prompt_number": 99
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "`factor` takes a polynomial expression and factors it into irreducible factors over the rational numbers"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.factor()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left(x + 1\\right)^{2}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEYAAAAbBAMAAAAzEOSeAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAMmYiu80QdonvRN2Z\nVKvu110NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABSklEQVQoFWNgIAB6fBIIqGDgMOALIKSG24Dx\nMyE1nAuYfxFSw8DA+42wGu4Cwmp6gEoYFYAEVqAIEmU6ACRMQCxMEMbAwCcAFF7BsJCBAcjBAkxA\nLgWGDGPsXTcG9gYUFckQXso5kJoKBgbO//8/MHAaoKi5DuWxg9RkQjmrUZQwoKhhvQCRBHktvc6q\nogDCRVHDcQAi6MTAwNbAtJ0b6D4QQFHDBBXcy8DAkcDxjdcAixreDRDBWUBzGFgdIBw0cxg/wNUw\nMPAXgDmtoaE7Q0NjQGywv2BqgHYxMMgLMCSAaDRzuKB2Ad3Mm1DPwJ4AVoLdzX0MDOsv+DMYQZSg\nquE5ABEFhmFeeXqTAqoanpe/HzEwsC6AiHIbQGgoCQsfMNcSKghOHwhlixBMBoZ2GMcZxsCg2QJg\nQjjSGFCaBe4MZgWYanRaGSoAABjwSSfir+drAAAAAElFTkSuQmCC\n",
+       "prompt_number": 100,
+       "text": [
+        "       2\n",
+        "(x + 1) "
+       ]
+      }
+     ],
+     "prompt_number": 100
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "`expand` takes a polynomial expression and expands it"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = (x + 1)**2\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left(x + 1\\right)^{2}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEYAAAAbBAMAAAAzEOSeAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAMmYiu80QdonvRN2Z\nVKvu110NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABSklEQVQoFWNgIAB6fBIIqGDgMOALIKSG24Dx\nMyE1nAuYfxFSw8DA+42wGu4Cwmp6gEoYFYAEVqAIEmU6ACRMQCxMEMbAwCcAFF7BsJCBAcjBAkxA\nLgWGDGPsXTcG9gYUFckQXso5kJoKBgbO//8/MHAaoKi5DuWxg9RkQjmrUZQwoKhhvQCRBHktvc6q\nogDCRVHDcQAi6MTAwNbAtJ0b6D4QQFHDBBXcy8DAkcDxjdcAixreDRDBWUBzGFgdIBw0cxg/wNUw\nMPAXgDmtoaE7Q0NjQGywv2BqgHYxMMgLMCSAaDRzuKB2Ad3Mm1DPwJ4AVoLdzX0MDOsv+DMYQZSg\nquE5ABEFhmFeeXqTAqoanpe/HzEwsC6AiHIbQGgoCQsfMNcSKghOHwhlixBMBoZ2GMcZxsCg2QJg\nQjjSGFCaBe4MZgWYanRaGSoAABjwSSfir+drAAAAAElFTkSuQmCC\n",
+       "prompt_number": 101,
+       "text": [
+        "       2\n",
+        "(x + 1) "
+       ]
+      }
+     ],
+     "prompt_number": 101
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.expand()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x^{2} + 2 x + 1$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGgAAAAWBAMAAADeGsQjAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABa0lEQVQ4EWNggIDcvQJQFvEUmwPzBOJVQ1Vy\nOPB8IVkTXwDLV5I1MTBwfSRDE4cCGZpy0fSw3N19AE0Iyp0IF2a/AGdCGMIMbNh96Y3wRxhDDEQx\nowOENmRgeAdhoYpLX4Zr4pm1aiNEkksBQr9gYLA/AGGCSZg4AxNcE9///x8gKmCS8wXwaRJSdlVT\nQBgJ0wQU6RdgVDIJSkI1DGwTYwJ7EwdSEkJoYv3GIMZQodCJRRObANtHLgeIBIhEaOLYwJDIkC+w\nBCIHFwf5iZGBcwNCC7Km2wwMAgyzYXIomhgY+BVgEgxsM2fOeDlzJjjOmAxAwp/Aciji4NA7fwBo\nIhzATVzLwOLAwPMH6BQwgIuDnMcloM/AhEUTzwUGJoeFTB8YFLFoil+wn8EdIo5iokdargXrL+4P\nLAVYNAkrCaVDxVE0zf///wejkaJaOdRAmPN47X6YQ4UQFEwSIQJh4RIHy7IiW4ukE1kcAEJLUX2t\n8S2aAAAAAElFTkSuQmCC\n",
+       "prompt_number": 102,
+       "text": [
+        " 2          \n",
+        "x  + 2\u22c5x + 1"
+       ]
+      }
+     ],
+     "prompt_number": 102
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "`collect` collects common powers of a symbol in an expression."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = 2*z*x**2 + y*x**3 + x**2\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x^{3} y + 2 x^{2} z + x^{2}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAJEAAAAYBAMAAAAISQIAAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACIklEQVQ4EZ2UP2zTQBSHfw62ExJbnFKpY0mL\n1C1QEEJ0wguCjaoTGyFFMCEiBmBhiViYqJCQiBhaJCZQISojA5ZYYKqBCVUMIFWiC6SIf6qQgn3v\nHr6DnId68Hv3vu89X2zHAB3tBaEyS/DXX1tIWtZg2An7djEj5zBrFzQYtsoDu5iRG1iLrIYBw0Wr\nJ8EGTs1ZDQNOxFZPgSeiwMhh/XaBRqhbZGhw5B133z+Lud9POBsRdRhsjxDG4H/n8nVORsUcTsTu\nT81wIlocBD6rstfyYpVmgQ0qabASlT9oXrVBi0/AsZjSVw8f6Xecjf9g0F6IqCjP7C2Jv5O+DIea\nADaoRrC+7/h0QxbG38ClnWneLeFMHZ5vqymnN4KOTNnQoNMqdyuLkrYeozQwPMD7gXFca9ykSc5q\n8y1lPEmDvvC3qlGG3eV3qPWlyB5Q6eMsLokHsgwH7gxlbBhwN3Wn2kfsafwzaR0QuEfd2fmFSnmS\nAVV3+ku2sBann4he7+5mr5dkPSW5ha+qPVVkVTeQw6xbSDX9E++nHr4iVuBGCH6n+6VjRcX82eWw\nKg6gRJNqM3hqTgoSlKL76WOYVPUEu0xDg2eWn+ME0bDvqRed93Ty/MWj3nZt4HbIeHnl8h1jkg7H\npuoXlOccaX4zPCwNh7+cQ5PTV6mMpLw5Zxg6VA4F/tzxngxoLIqNWexVV/TULo1mY1FsdLFq2Dtf\nzDfjnTfjD1l+hrPqUckuAAAAAElFTkSuQmCC\n",
+       "prompt_number": 103,
+       "text": [
+        " 3        2      2\n",
+        "x \u22c5y + 2\u22c5x \u22c5z + x "
+       ]
+      }
+     ],
+     "prompt_number": 103
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.collect(x)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x^{3} y + x^{2} \\left(2 z + 1\\right)$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAJkAAAAZBAMAAADQwpFRAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACf0lEQVQ4EX2UO4gTURiFz+Q5mczEIYrNQgy7\nsmCxmkqxkQEVi6AEC7VQNiTgYrG4haVI2EJBYdkVBEcQgqWgxAfYKKazEoNbiQgqWNgloCgixPuc\n3Hu9yRQz/znff8/cxyQAv1rtUFSWx+qrGdDSH6wFPYvNrVyU3pwKbSBo5oc2n3lu5P+YCu0gmP76\nUiPz0z5oqlvpT0WAN5oBLah822Imllulpb+WGLbiqmLOOAVglTXWgZMfXypjlHILSPcn2v8zqc0q\nP2DOFpwaLjdMSnWdbkWy85V+5pfatUsVOIPzRKeaSIcofVaQE3Ext03TFiVxo/wXWdPnA1X49x4+\nIboUodRB+q+CvKoQKZpWkcRvtSNZ06eWVhqPh8Q7BxRGs9IKXaC8cHyxSpqB3e+RETOUaRMoj8Id\nIbvReMMGQJ9bbgCnmV93+f41HyNFJ0EukaZA4AUjy03MzX+qsdpIy28iF+ZGXkRhpvsBxR5vE2kT\nSOybDN0CQhzlXUaa14GDgkhw8BU7qrxPzi2BxP5GEfssfTE1I80fkgaZgOwI7/rEuBTHG3F8n1QK\nFGkL1LxAb8jF8d3vcTygNTtTlkYSQuqA/PD3syLZN9B4DvlKvQGOgdzEpZ9CtgMvPIAUH1Cs4Zme\npkB+Cm+BvXgE1HifnkZOYbn7Gic4C3pZ+YMQ+6ZAoE0O6vrF7Y5/Y2Vfw5YWDLBzvryyxplzcEn+\nK4o0BfKvdzwedwJcu8MHJKcQHPl9iHzb4h0C0p3jl0iTPnu6kSapSFbKyCmNH8YemX5WA1yIfxKV\nZMWquNdSEdbxVNOmeG4aunbkwrh9eqmvc0PVDW3IYmQYs2VGW9d/vVeAfySmjrOStsWsAAAAAElF\nTkSuQmCC\n",
+       "prompt_number": 104,
+       "text": [
+        " 3      2          \n",
+        "x \u22c5y + x \u22c5(2\u22c5z + 1)"
+       ]
+      }
+     ],
+     "prompt_number": 104
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "`cancel` takes a rational function and puts it into standard canonical form $\\frac{p}{q}$"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = (x**3 + 2*x)/( x**2 + x)\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{x^{3} + 2 x}{x^{2} + x}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEUAAAAxBAMAAAB+EHnNAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABzElEQVQ4Ed2Uv0vDQBTHv61pGmtaQyuOJa3Q\n1R84uJlFdBQHXQRrC4pDsZvObi5anIwiVXEShDqL2P/A7uLgpou04i+KEJPe5cddrJlcvOG9d9/3\nuXeXC+8AMgpFhUZdXbwcr3VN0kQ8H20GMUC8Esyk64FMco9DhPsr3yr+zCmIb9wyyG2ihDTiR4Fn\nlknXhQ+ixFTiH4HJOgmplbToAwltpqp4mOTQVE6VC0WNZczZrhLKjs8VgFA+uiV57sauA0TeMYhN\ndRsQFbEVozWsSi4j1bCMdeXMrINe5k+5zB2g4NBaB/SrHWcZUdf3n3S9YcXhEcu+WAa4rZu8M5w6\nFxA0yF/mRogpwwj/wMgNhLWTcBMZYOn4BtNOFffMMyuliUi7rymUgVQ2uWo6Z9h7VQ3jMzSWyW04\nGTewGVfxRxFvUX/6XylG4Gj+wfeWrpWgqqLWUwliJE1+DWISs4Kvef1rYi2/xiuSSpQBPuGZl2h8\n6tG4MNr4jem0POaxSCC7DpGJRlpePji/ZBjmJSAtnzAM+vdoHeYl4FueMpzsafk1Xd/R9aPOrh6Z\nb3n7zN6XgG95yjAy3/KUYWS+5SnDy+RiqHXOw6jsZIGd4hu5TIhuvW/VGwAAAABJRU5ErkJggg==\n",
+       "prompt_number": 105,
+       "text": [
+        " 3      \n",
+        "x  + 2\u22c5x\n",
+        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n",
+        "  2     \n",
+        " x  + x "
+       ]
+      }
+     ],
+     "prompt_number": 105
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.cancel()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{x^{2} + 2}{x + 1}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAADkAAAAxBAMAAACSZRzbAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABgklEQVQ4Ec2Tv0vDQBzFX2qapjHUoxXntELX\nqji4NYvoKA66CP4YFIdiN511clFHo0hVnARBZyntf2DBUdx10VRURISY3CW9BC/Fsd/h7t373Pvm\nS0gAVpU68ZVgU8y+A4HtW6qpv8fTzIz8EU8Brd2NqkaUyo+3Te5UuKQqB4U/K9XyqWQyMQq8+BYw\nhwWmNYPtT0C5yST0o8sbJgNaI5RmhyeLRsZx7Ch1T/sE0lJqWw29pyALJD8BhShtzWQ5b+VUvQYk\npN2VF6cP1BwwOkyxrMNny2p5RmKE2ndNkA7nna8gm9BICQkB1VtImFg8bWCKRzvZ6dXKBJArZNeq\nAlpznK+Q7Us+81/mvoNwI9GFnvecLmX3/PSRAdOhDyICvIPcENFBdk+ql0X0POhS+ieVCuOzKywk\nyA5hy9iNpcvYIBexlOA4GEbQGXijdN2y9izrhOrQzPqP+yvSEmTPEjbycTT53W/L1TgqjeWLmwwi\n6Hz/uuPf9wHdAhr2uJ7n0lO/1gdq68hIEW8AAAAASUVORK5CYII=\n",
+       "prompt_number": 106,
+       "text": [
+        " 2    \n",
+        "x  + 2\n",
+        "\u2500\u2500\u2500\u2500\u2500\u2500\n",
+        "x + 1 "
+       ]
+      }
+     ],
+     "prompt_number": 106
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "`apart` performs a partial fraction decomposition on a rational function"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = (x**5 + 4 * x**3 + 12 * x**2 + x + 4) / (x**3 + 2 * x**2 + 9 * x + 2)\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{x^{5} + 4 x^{3} + 12 x^{2} + x + 4}{x^{3} + 2 x^{2} + 9 x + 2}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAANsAAAAxBAMAAAChcsGXAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAEFElEQVRYCe1XOYgUQRR9PUzPruMMNqsIIiyz\nCoKgeIKKop3ICgYuJoaOqygisoOJJhosJiJ4Jg4inpEHbmJk4KQG4gUmYiAoKIKu94ljdVf9qt/V\nNTVu4iZWsPXr///e66qZ3qkHpKOyZrAhI8ff4e2RI8tSpacP2eovwrD9sWNXtVEd61hMCzuwyt9g\nV8PrnTdQrfeM2/3Z9WHcj7OZLqtwyNdQPeGrAi+xyYvPocNHC6NcUif6WzrsENz0oB2QIC6P2el7\nlOg7RZGeTwLFZ7dbej2qI0+gCUVP8MluPKoTua/KxvfAdJQ+U0fpAUW+2RBOjQOFnUGAwhuKUPkh\nwyCW8+zHQm4J8JY6DlJAHbQWs4uwNy4KhmRckhMweFZF/a3iVxmWaypVEM2vgHUtuQ7roYp0h2oU\nU54QKEV0HrpaJ7neuOe5RGuyRO58pOXuXr2mviq6wyEnCfvmrp9Xw84nqoHkemIhl9Yqw9tjh5xI\nHY+COcs3D+Ndu63QJCdJ02SGEEG9Z7T3hOoWE1X7cDZXIzIkuwPCL5iJA7UjBgzVwUk5YXqM78ux\nQVC1LuTEEWdqllzvGLZhJLpiwCTHgZxQvACYknnjVLXcSnZn1Sy5p0Akuvig3TEgJ0xap9U0YHez\neazZPCfWM5ESsVqp2TzzutlM37D0MAuLE9wHDQbvUMAcIXC/JR5SD/Uwl5ct+73UrmV3dwPFGJVf\n4gzM0B2GNEtYjhahkJcTDG9g1zRZsrvKAxTii4VxDBg1+uw4UMmlhMDWC3cwyACm+jNXy8ht2Ll3\nZfhj6nixwdCqg5NyQvGvb07fLg7Q1T3tFXaN5Kprv63A+Xb7W7B0YN5+pka740BOyFtlrKv5EpE5\nKpSiB6K1mH2EwBbWaYchPwa7mK4dHT5CJ8f/5P8TmIQTaP/LMT4JG5x0SZ/nmbDd6bobr+eZsN3p\nLufzPBO2O13lANvzMEOQszvBk4Wxi5JhXGWesz0PNwSw7E5/o/iCYynOYCjpnLXnoTv/EmYIMKow\n6va/FljNWZwY3pCPyfPQzyUzBKDrPf1wfoe4bDIKF4aVXSF5HoIyQwBtd+TvdPATWDTESFwYVs6E\n6eXe4XmMITB2R10LXovdNaRZSKlITiyO811ndORCXu4dnscYAmN3lNyIcEM1ZhaMnDAR/iEv9w7P\nA20IjN1RclNq5ZEGMwtGTmD8o6MrgMMQKDnsWzBygZkFIycw3UYnV7A4ATJDYG7/Ir9OfEayxn2C\nNBF+QXO5T/r0k7oMAe0OOC3u8NosZDFeNX6553JOQ6DkDsWVT2BmgeRSjFetoytwGgIlNz+a1eBm\ngeQSjF8t5xgI6jQESq707Ba4WeCYLnJ2maB2Pl2bzy5T9mIynbmF485vejrc/n2YP6uHqH5q+R/h\nAAAAAElFTkSuQmCC\n",
+       "prompt_number": 107,
+       "text": [
+        " 5      3       2        \n",
+        "x  + 4\u22c5x  + 12\u22c5x  + x + 4\n",
+        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n",
+        "    3      2             \n",
+        "   x  + 2\u22c5x  + 9\u22c5x + 2   "
+       ]
+      }
+     ],
+     "prompt_number": 107
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.apart()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x^{2} - 2 x + \\frac{30 x^{2} + 14 x + 6}{x^{3} + 2 x^{2} + 9 x + 2} - 1$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "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\nAAAAAElFTkSuQmCC\n",
+       "prompt_number": 108,
+       "text": [
+        "             \u239b    2          \u239e    \n",
+        " 2         2\u22c5\u239d15\u22c5x  + 7\u22c5x + 3\u23a0    \n",
+        "x  - 2\u22c5x + \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 - 1\n",
+        "            3      2              \n",
+        "           x  + 2\u22c5x  + 9\u22c5x + 2    "
+       ]
+      }
+     ],
+     "prompt_number": 108
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h2>Solvers</h2>\n",
+      "SymPy doesn't expand python syntax, so equality is denoted with `Eq(x, y)` rather than `=` or `==`.  Expressions that are not part of `Eq()` are assumed to be equal to 0, which can be used to shorthand $x - y$ for $x = y$ without using `Eq()`."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x, y = symbols('x y')\n",
+      "expression = Eq(x, y)\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x = y$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAADMAAAANBAMAAAD2/0vEAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAArklEQVQYGWNgEFJ2VVNgQAGMuQoMfgIMjAns\nTRwTgDJsM8HgAojJ9YBBH0gJsH3kckDRxODFO4FhNwMDIwPnBlQJBgYBPgWGTyBBfgV0KYZ4AZ4/\nIMHzBxgEgBRbBxgYgIRuMjA9YGDgEtBnYAJJIYPNDNxAJfEL9jO4IwuD2LcZ4gsYGISVhNKBFCoQ\nTrrvgCqCxLuJxEZmMk9g/IrMR2JzKHArIHGRmaxKd4BcAKWSIWXiDVoSAAAAAElFTkSuQmCC\n",
+       "prompt_number": 214,
+       "text": [
+        "x = y"
+       ]
+      }
+     ],
+     "prompt_number": 214
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Solving algebraic expressions is done via the `solve(expression, symbol)` function (not a method of expressions).  This function returns a list of solutions, an empty list, or NotImplementedError (if it could not find any symbolically)"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = Eq(x**2, x)\n",
+      "solve(expression, x)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\begin{bmatrix}0, & 1\\end{bmatrix}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAADkAAAAZBAMAAAB5mpuAAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAu90iEJmJdjLNVGbv\nq0S21SJoAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAuElEQVQoFWMQUjJgwA4eKSUwKGCXAokyXyAs\nyxJW2oBuAqcDTC/nAhZlNFlmebjsHgaGTFRZFtH7cFlZBob1QA4KqAcKQFz1l4Hh/QIUOQYGuCzL\nV6BsAS5Z5m8MDP0J5MmyAPXiNpkBaO/6BbhMZlBkYNjvgFO2hoEhEk0S4SMGpgUsJxj8J6AogPuX\ngSW9toGB6QuybOx53Q0oMfgYWRbMRo7fDfhkWfDKcmNoRbGX6rJKeNLzBQBGuj/bw6OU3wAAAABJ\nRU5ErkJggg==\n",
+       "prompt_number": 217,
+       "text": [
+        "[0, 1]"
+       ]
+      }
+     ],
+     "prompt_number": 217
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = x**2 - x\n",
+      "solve(expression, x)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\begin{bmatrix}0, & 1\\end{bmatrix}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAADkAAAAZBAMAAAB5mpuAAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAu90iEJmJdjLNVGbv\nq0S21SJoAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAuElEQVQoFWMQUjJgwA4eKSUwKGCXAokyXyAs\nyxJW2oBuAqcDTC/nAhZlNFlmebjsHgaGTFRZFtH7cFlZBob1QA4KqAcKQFz1l4Hh/QIUOQYGuCzL\nV6BsAS5Z5m8MDP0J5MmyAPXiNpkBaO/6BbhMZlBkYNjvgFO2hoEhEk0S4SMGpgUsJxj8J6AogPuX\ngSW9toGB6QuybOx53Q0oMfgYWRbMRo7fDfhkWfDKcmNoRbGX6rJKeNLzBQBGuj/bw6OU3wAAAABJ\nRU5ErkJggg==\n",
+       "prompt_number": 218,
+       "text": [
+        "[0, 1]"
+       ]
+      }
+     ],
+     "prompt_number": 218
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = x**2 + 1\n",
+      "solve(expression, x)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\begin{bmatrix}- i, & i\\end{bmatrix}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEIAAAAZBAMAAAB3M+XvAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAu90iEM0yq2aJmXZE\n71QPQ+8YAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAt0lEQVQoFWMQUjJgwA14lDQZFHBLg2XMSVRR\niG4eUADVjAp0FUABVBXoCkB8aqtgmbUB1RqwALItnDwXUFWABZBV2HEFoKoAC4BUsAQpAYFqggM/\nmi1gAWQzGN47oJoBFkBREc6CpgIkgKyC5R8nqgqwALIKng8WDP7IjgUJoJjBIL2BgekLsjFAAVQV\nIMnDyCpAbGRbwHINYBKJQFfBQlAFB5JuCBPdDAwFmO7AUEKMGUoE8os6AB5MIKt1Ojz0AAAAAElF\nTkSuQmCC\n",
+       "prompt_number": 227,
+       "text": [
+        "[-\u2148, \u2148]"
+       ]
+      }
+     ],
+     "prompt_number": 227
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "solve can also be passed a system of equations and list of variables, in the form `solve([f, g, h],[x, y, z])`"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "f = x + 2*y - z\n",
+      "g = 2 * x + 2 * y\n",
+      "h = -1*x + 5*y + 3*z\n",
+      "solve([f, g, h],[x, y, z])"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\begin{Bmatrix}x : 0, & y : 0, & z : 0\\end{Bmatrix}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAL0AAAAaBAMAAAAQ4EBVAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAMolUmc0idhCru+9m\n3URozekSAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACfklEQVRIDbWVO4gTURSG/8y4m5uYmU1rIRtQ\nSWORwn6jkEIbA9oIIgNipbiDLITFYgdRliUriYV9QERWBKOwrQw2FiIiiq9GKzsJvnBtxHNuZu7c\nmZsN2ZUcyMw5//nvl/siAZA7gKmEe3SIbXhTwQMXegzOb/FzKvGYqYWmwRbHlsqGqAvXq9HadVHL\nI8BdlkbwZ2rireY201O46ZlqokSA26yM4D8HDiVmMyv1YZmr1nwRYDv+BrAQaPZsWuzCHntqEWA7\n/h9gUMtCtXquC/eHVhtpBEj4q8uXr/hs+0Af8ZP4slIDxUEfFwMqnS49OnW4v1VvmHx9kgs50wGS\nX+wRsVJ65zSpKzbpMfsdmK9QkoRl97HCZZtdixXkyKOHuLd0nOsUQPLbNFMrsLZsj/scI/jn9zRx\nf9il5yg+Znllw4gBLwOCnSZNYKZHrygEzS2zP8FeH8mOdCrm/mBfPJxwEcB6BbzwpD5Hq1BB+79Q\nU5VMBkHum1Lm6rCz5+vWVRuIATd82GelPl9GoAwfAV6aHg3k+6p2eihl7+cR1aUkAkj2Is3UDlaQ\nD5TjKtBQxTDZAF36OOir6DxSYddRSIQIMCiTxPdnUHuIS9yWxw+nJh6hkyKcwCBkg7w/eI12Wfzi\nOo79T5+d41wDAPL+8O/DWmv1cCitfH0hqstlOKkdWKue9Lgl7z+utW4BnwIWoqiXNj/LNAFo/NiV\nen9JVcaOwfXSBrNS8zdbpISaWmiKv1op01JWMOqxfBFqfscv+lop0/WsYNRj+anpuS3zDyU0eFlh\nLD9r3kUt/7+s/i5GTjbkjbSdCSZz79hVeC+H2Hd2PHKiAe6DiWz/Z/oHXRmTEc3KSdEAAAAASUVO\nRK5CYII=\n",
+       "prompt_number": 225,
+       "text": [
+        "{x: 0, y: 0, z: 0}"
+       ]
+      }
+     ],
+     "prompt_number": 225
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h1>Calculus</h1>\n",
+      "integrals and derivatives can easily be calcualted either numerically or analytically using SymPy; either through the `itegrate()` and `diff()` methods of an expression or by directly creating an unevlated integral or derivative using the `Integral()` and `Derivative()` constructor.\n",
+      "<h2>Derivatives</h2>\n",
+      "The `diff` method deterimes how to take the derivative by the order of arguments passed to: valud examples include the variable and degree, or just by repeating the variable(s).  order of differentiation is implied."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x, y, z = symbols('x, y, z')\n",
+      "expression = 2*x**4 + x**3*y + z**2\n",
+      "expression.diff(x, 1)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$8 x^{3} + 3 x^{2} y$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGMAAAAYBAMAAAAc8F6kAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHaJmUSrVGYizbvd\nMu8FnLUeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB+klEQVQ4EXWSvU9TURjGn9NzL/eWtnhSE0Y4\ntIlrazUEw2AJsNAQG/8AS5zUxToZ4+AdGBhM7KBRFyyOhaGTiWEoISyw0ITEgQUYXDRqJTEQv+q5\n5+MW5HCGc5/397zPfc/JvcCJVRhlJ6rTkpYmTgNZOYHTtGCFruGexXPyfseCFdrEXs1mOnUblewj\n3pRt5lDbRjV7wixm+q0FRmg9UunsdKT/v378ynjVmLRoFIroi3DqKMJSPId3bMi8EfACxOuqGmrH\ndQOpKZKr4rfudPNuW0vaBFlTOlnzD5TyuHreKpOfSmH34WOmpfuL0UDpVGFUv91E0DvYt25XJ4D7\nx2NA+tKLLI8QepH+Ikjm7s2C9MhVjkUxy+kugeT99WTdEtnZAC7iKd+SHvX2kRNqfvdvmTL63dOH\nCs3eFPoFl3GdPQopXoq/YxXw5/DsgKC/KaHeehF8ZQzLGrMBjkNggCH8Ghd4FKGNxsqnRqMowGug\nVUXYplaFpf4Aw6K4A+y1Ie5llpnSZWgFEG1EOTOI7Ysp4grvPZZDzBL5DGzXHsQ6GFGRd0jMAe4S\nfF6ptvBKUbmbKQvwDt2jRCceKLOESqg+TE5jMJMe01R6JuJOlcrk9kh2QVJgsHBDHMq6TOSsOXMW\nKeIGVqevTn5YjfNhkif4+a7VcTOzgv8Dg/ppcQmVik8AAAAASUVORK5CYII=\n",
+       "prompt_number": 109,
+       "text": [
+        "   3      2  \n",
+        "8\u22c5x  + 3\u22c5x \u22c5y"
+       ]
+      }
+     ],
+     "prompt_number": 109
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.diff(x, y)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$3 x^{2}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAB4AAAAUBAMAAABohZD3AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIom7VJlmdt1E7xDN\nMqsI8sYEAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAx0lEQVQYGWNgQAKqphuQeAxMAnwHkPkcArwf\nkflcExh/IvMZGFh+o/I5ChgYhJRM4IKqDAyMAQz+CVABtgAGBvYvDPwNUP4khrkMnCsZ9h+A8HmP\nuFiDWDD1XP//fwDxjzIwbK+TLAKaDQK8GgEM3Aps7RwHwFwgoXWBaQPTbxYBGJ9rNTcDjwGUxyjA\nwPyFgYEfqpuB/zcD8zcGhvsXGDaAVXAZMHB8ZNlQz8AO4bMlMPgXzHewZxCDGjA11JJhX/l2tQQw\nHwCH6Cl3rmNqTgAAAABJRU5ErkJggg==\n",
+       "prompt_number": 110,
+       "text": [
+        "   2\n",
+        "3\u22c5x "
+       ]
+      }
+     ],
+     "prompt_number": 110
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.diff(z).subs(z, 2)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$4$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAPBAMAAAAv0UM9AAAALVBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAOrOgAAAADnRSTlMAMpndu3bvImbNiRBUq9OB\nhjcAAAAJcEhZcwAADsQAAA7EAZUrDhsAAABESURBVAgdY2BgYBACYgYGExDBmgIiK6aAyAUgkqMA\nRG5lAJELQCSPAIjcxQAiz969++wqUIIBrIvhCYi55N0NEMXAAABbkhBrtxdTYQAAAABJRU5ErkJg\ngg==\n",
+       "prompt_number": 111,
+       "text": [
+        "4"
+       ]
+      }
+     ],
+     "prompt_number": 111
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "You can also create an unevaluated derivative object using the `Derivative` constructor"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = 3 * x**2 + 4*x*y + y\n",
+      "D = Derivative(expression, x)\n",
+      "D"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{\\partial}{\\partial x}\\left(3 x^{2} + 4 x y + y\\right)$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAK0AAAAtBAMAAAAuMfaoAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAZokiELtEzTLvmd1U\nq3Z1ltcVAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADaUlEQVRIDbVWO2gUURS9uzO7mezMfvyAiBab\nT2MEXS1sM0QszW4hFqJmsTIWSQplQYNsY2G1KWJsVAZBhBRibASLsKCFipBFC6voENIkYBLJIiLR\neN9v3svLhmR/r5h33zn3nHn7ZvbOBSAj1N1D51ZfeuBcvtWe6BcaA2uiDb4xNP3ZBl9i+aYdvtZR\neNAGX2vc6P3TBt/hIsT/td7XQM+OX633jVcBOtvwniXHALLpHfbbd8ndgdkVznoAq1Jt5RVFOBPH\nu9Y3Ejw96wO8ktJ7MgSwM9a6ut5LHK2wrEgFYjkpuClDPPe8Uf8T7WIOxszZaekV82VMIgefap3D\ndpnA6cpIZT+Cp7svB4DtByEPLE9HtHWiVkIfgOHBXErk4lobtnJoGsWWxloN+BFAYgOSLzkV8nhg\nZkTy0nZfSdKkGZEqZwuPMzoF2TEOXYPrLHJ8jhiHtvsGJMt5xlOVKTRBF+IcrPFPFxgbSMMdu/ou\nKYY8jLGN3gYY/HFmwe/c3FzTfA+gr7nyZeQEDLwAY5Ky4qYcGXW5m5wiZDPWcQ/MdGjWZjehrJCa\nPvoOwBH/NaQ/QILdVZAcKRWlIY86KjQ4Vgy74aqTkbyQhgF9e+Gk+9YoPwe6DXzJfZookP681PHI\n9mjQOWkSvTKE73uCu3ALwIQnkPRpCicF0l+GTWWQ30T2a2QgsgFCQ4ThQuHOw0LBQ7M0ux/5DkSr\nUCqqpEBq7Jf4JqsQwe8zalxU88G35MzPf3/sg/Ubt4vPmD95TgqklBGqYI7nsNjkwF533FVIuAEu\njhABpN/h81oELFhXWILw5UiN9yExgX1KCub80fIQnJK2im8yF92IrBkprIJR3nYIX44cVnQ8xDMD\nuDF9Ec6vDHalFF5IITz09+C3xYV9eNafl3lxFiRH6P9Na/qmFC81FFIVI+dJhyQpcpeAWtP3lGVu\nu0bVzTP2K2TzLBIkQ0zym/Wm7z7L3Mt1Fq5qaQwJVRDWm754WcvdeTmyXNRIhtgCVps+kx+Zpqhn\nuZ8m603fx3osauUaOYKypo8WRZbklNnc8DXmEukwafr0otiwZyBkTZ9eFAO64YA1fXpRbNguEIqm\njxfSAG82yHqs6SttKYrNumKD6pOmTy+Kzfuypk8vis37sqZPL4rN+8KWpq8FfsziP+3M7VCA3hZS\nAAAAAElFTkSuQmCC\n",
+       "prompt_number": 240,
+       "text": [
+        "\u2202 \u239b   2            \u239e\n",
+        "\u2500\u2500\u239d3\u22c5x  + 4\u22c5x\u22c5y + y\u23a0\n",
+        "\u2202x                  "
+       ]
+      }
+     ],
+     "prompt_number": 240
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "To evaluate the derivative, call the `doit()` method"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "D.doit()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$6 x + 4 y$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEUAAAASBAMAAAD/KA5VAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAiXYyEM1EmbtmIu9U\n3auvYvmWAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABQUlEQVQoFX2QPU/CUBiFn2KVNhSpJEbdCj9A\n2BytJC6aAMY04ubqxGBQN3FzUn8CkwnRgcHBkfgDjHEycTE6uTAoIX4M+kK5N9YY3qE95/S5b+4p\nMJXJ8+8s6HR5K17WJiLutVvDqmsjYkWZ2JVS9qdSw/e18s2KUlZLqb+Mq5nUenoXCvNnGS+E1B67\nUcGc8Tj3KW2SaJuufZcc3lwxBSoYTosclLrELw3f6DqN6B5XmAupfASpW+yeyXg9JGC4x8kL4yc8\nXiFRxv4Q1Bsw00HwEAQbopcQhqo/9gbSy+7BYh5/QKk9N53O1xM1YtLbkfu0HD9HLMrIAfmHx1iP\nog5ZbVfbJzRF90f1gnfYp3oqmbH3TDFbmOvr/mhm9vuFYvqgMUijD82EcS36NXTbv8LJsil9Rk/S\ns7zRBExkdwT5AerTRXW3VzopAAAAAElFTkSuQmCC\n",
+       "prompt_number": 241,
+       "text": [
+        "6\u22c5x + 4\u22c5y"
+       ]
+      }
+     ],
+     "prompt_number": 241
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h2>Integrals</h2>\n",
+      "The `integrate` method behaves similarly. You can also pass a tuple of (variable, lower, upper) to calculate definite integrals.  Note that oo (thats double letter o) represents infinity and constants of integration are not included."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.integrate(x)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{2 x^{5}}{5} + \\frac{x^{4} y}{4} + x z^{2}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAJgAAAAwBAMAAAAfo66RAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIpm7MhCriUTv3c12\nVGZoascqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAC7klEQVRIDa2WT2jTUADGv7RJ0/+LO4inWSY4\nwWGLqAcRWryrEUEvhRWReRhi2WE7CFsRwYs4PehFDwUPMhxSPAlF6ApOhgPH2EVQrEcRZIIdO1lf\nl5fkveS9rMG9S973/b58eWmT1wLuUG+MdFzFz6K83FvFe9vS0DdTisQgvik9Q5uXInEX4jUJANIT\nocvG27JTLgxYNnzkFF2QZmQKkrVVByvTKph3bk/7LS7LGoOVxUwkHlkVUUPbEZeVMVhZoo7YH6si\naShdcdnGaP6EmPBuquuU6aae46GrDsu+GjdizZJdlFcOfWhhdsyLQEm2eAvXxqE88Qc8zkJVq2aX\nkg2PvSsZUv2M9JYow3kvQG6wmzE4kwqXKOvHES2IMqwXKUBDShJziYbnGGqxJ/Lz6ZMmMVb6pjzm\nkHgXl0r9rHDoRqwBZHI4gH6sXywYDok0sCrg1EoaKnnizwPLGfMT0sIyhkQrOCMvS9SUHSgvZ4/W\nF9aLGBEGGRIpxP8KM9TMdJHq9Xr1q2vluY4wyBDtZlvy6lpnJlvCBplJPrWAMR3AfGgKEzWf6RrZ\nnDv3zC57NJFLOOeYAnwf9xzsmXzxaCIftEuO6cfqu6+nHeyZ+NNcwI8Tvd4WF2GEP81AwMbWbhNf\nrF3ksEfYaY9tS4rpnnJlbbRiE9FxsDK6p5g4aHWQZ5YbtNku4xgR9HOxV0Z3G7UiWpDl3Wk2F5vN\nN7IAi6095a4savn2yiQpB+/uKWTjCRxOWpyimO4pG0BFnLPcwcqsPUV9Pfex9v9l1p4SwY+3bFfq\nvXqM1c5TaZtqzp7tHgMXTl6GFpd+yCkgWeAML+ZgamaZ0z6xypf5OGvEWCGYKz/3sUyX/a4KLozY\nr3ZJ5Nve9zBlUZP8UMmH1gpTRnrOyrugS/8+SE7KGxJA7M1QZVNg/tn6SrVqqLJnQN70ldhGZnLy\n9tOWrfY85oBXgaFEiOdsGNnHgWVDIcqUsevyuyRX0YvbncCL7T/8ByT3z857tA1pAAAAAElFTkSu\nQmCC\n",
+       "prompt_number": 112,
+       "text": [
+        "   5    4         \n",
+        "2\u22c5x    x \u22c5y      2\n",
+        "\u2500\u2500\u2500\u2500 + \u2500\u2500\u2500\u2500 + x\u22c5z \n",
+        " 5      4         "
+       ]
+      }
+     ],
+     "prompt_number": 112
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.integrate(x, y, y)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{x^{4} y^{3}}{24} + y^{2} \\left(\\frac{x^{5}}{5} + \\frac{x z^{2}}{2}\\right)$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "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\nDbZdySL60+YAAAAASUVORK5CYII=\n",
+       "prompt_number": 113,
+       "text": [
+        " 4  3      \u239b 5      2\u239e\n",
+        "x \u22c5y     2 \u239cx    x\u22c5z \u239f\n",
+        "\u2500\u2500\u2500\u2500\u2500 + y \u22c5\u239c\u2500\u2500 + \u2500\u2500\u2500\u2500\u239f\n",
+        "  24       \u239d5     2  \u23a0"
+       ]
+      }
+     ],
+     "prompt_number": 113
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.integrate((x, 1, 2))"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{15 y}{4} + z^{2} + \\frac{62}{5}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAIAAAAArBAMAAABCy53VAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAzRAiu5mrdu/dZjJE\niVS5jG64AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAClElEQVRIDaVVPWgUQRh92b29/zv3QBAhmqli\nJVwjqIVKSNTOi+ghpPCwSDBNrgmWyYGFgiQWYut2sZFcE8FC2FZEcoVnCrHUUk0iqKisM7v5dmfG\n22T3/Iqd971535uZnV0+ACMMOMI2XKSJytZ7mNcnu7zGvMKAVe97mnIYo5jGOCq/AWNqgRscm6un\nMhjpYRK3gHuiaokbtARIEetivfvAgjjDMAaXxWJjLDKYX5uB0W/jNBMzB8f2y0VXqJ4w/hA7mMB5\nt1JdxhLPE4Sx7WCF68p/hFgYAJmH5yybv5lEYXgMNxhQuCDkgYG1y/JtJL3Mn8C6C1wT9cIga4sr\n3WSlXz6jP/pTTKM63MBBruXT3CBvw9rhn0ZuWRP6aaXOF1CD3wLfwUeY4jq5gcWPY+MiMi1VF2SF\nemlX47/wd4BSA7k9A7OBp3V+ok1HE/pp3jX5J6tEpmes4MyH/m3ONlcfOzj17iowvnVTGA6I6o5O\n9ptdjHkef5lKTCtZlBTaEY5HWdvQd0riPoF9x0I7Ey5kKGcpNvYKVVp3K9+ZCalqaCWoN3gdzKh0\nqB4AFGXp+OeJoQ1ePSg5ec/7OqyBcWmxKW1Q2ZjE/wtJacBsSbNESxQ8LYK5SPlcFhN9KCqSpwlX\narWjnVrNv7sy3SAg0ySNHWkp/sPJEdIyORCTstpAVhIQLVExkJQvnq2NShKiJSoGkrJR7LiShGiJ\nCuFGiASIUcq03k4fKQZlR0kpkWmtnebukijpqLXTs4eTFpKuRSAYe/9pUKynNhDtNIoTSG0g2mlk\n0EtvINppaFDtDmNgRe3mJFIbBO2UtvBpdvbHHCXJxqCdStq0H1LQTiWDbxJOAoN2GinfevNRkgj5\n7TSRcn/RX+B+p9T15XjfAAAAAElFTkSuQmCC\n",
+       "prompt_number": 114,
+       "text": [
+        "15\u22c5y    2   62\n",
+        "\u2500\u2500\u2500\u2500 + z  + \u2500\u2500\n",
+        " 4          5 "
+       ]
+      }
+     ],
+     "prompt_number": 114
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "You can also create an unevaluated integral using the `Integral` constructor."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = 2*x**2 + 3\n",
+      "I = Integral(expression, x)\n",
+      "I"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\int 2 x^{2} + 3\\, dx$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAHQAAAAvBAMAAADA/fMgAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAmYkQq+9E3XYiMrvN\nZlRfnEjBAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACdUlEQVRIDaVUvYvTUAD/tblL0tReejjeUqtS\nFeGC6ODUooMnCh3EEwdpHQQXuQ4KCsIFT0RcrhyCY/sHCO2iDopXZwtXJyex4qIItl711PNsfcnL\newn5hJgh7/eZj5eXB/z3kchrca+x71gpZlXYkvSYVXkYswhIpdjVhh67utqMXV2P3cRO7KryzV1N\nzu12S/5c/uvWD+KsW/Ln6W23fgutulvz5apnRSyiUfWNusVWza0AA82r+SjvS6aYmn3e5O5NjihY\ny7+kQHySdVhl3SRHkdxiatLpEzGVxaBHTbXPQmSsVE1yEjjP1DcMHKdAHkOtUbikMQ8QJpRcAMpN\nKos50UKfLGERxQ6FBTqY55kflGxovPr46xfr2laVJNgDv3JUk384WdaE+6evHkBlMrE0u2pWUice\njEEzRmDXJquKmziCt/ptxsnIqkoha6hX6umRI6OOWVRqYy/mtc+Mk5FVgf1NMi2XkOg4Mo3fLDoH\naHjNmDna1elzQGIEKefIDIZWWC4Z4JfFyHC4273R7RovmaojTR5uuo1ilVCWme8QYhwfjISyDYFS\n82zdVR0hTf6vYg4DclOeWTcnAFCykOsfye644q2S20nkvYp9vJhxZCp9Gn2U33NKHKeHqZ63mulh\noJOPoWeuJ+0MW0zYmEx+Cgsrd945mnyGL88+JbKwcOjhPTsjWovJWbCxPcO2xpH8nUMfcM1H49KU\nZ2fiVhSQPDtTVIP73p2JW1Gg1Y5KBPqruUAryihXoxKB/nKgE2nsRCaCAgr7gYICwXom/medqgVf\nNsJRcxGBYHupHuyFOgWcCfVDzGfKxRA31Fq72wz1g81/Vymaaad+deIAAAAASUVORK5CYII=\n",
+       "prompt_number": 242,
+       "text": [
+        "\u2320              \n",
+        "\u23ae \u239b   2    \u239e   \n",
+        "\u23ae \u239d2\u22c5x  + 3\u23a0 dx\n",
+        "\u2321              "
+       ]
+      }
+     ],
+     "prompt_number": 242
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "This integral can be evaluated using its `doit()` method, returning the indefinite integral"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "I.doit()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{2 x^{3}}{3} + 3 x$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAFEAAAAvBAMAAABpiTu0AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIpm7MhCriUTv3c12\nVGZoascqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABzElEQVQ4EY2UPUsDQRCG38uH+fKSmEYrCQlY\np7CwkQQbS89GCAT0JwSEBDVosLMxgga0C1qIIBhsYxGb2AjmBwjeLxAF06gxbrxd3dO7Wa/ZmXke\nZu+WuQWkp1IypIwIPaYnQ2AJeYrRJyklQ0+TxBLM56TkT5hIT4ta4UpETqt/BVtVAcgvGjEQ2hOm\nry8ihzXUwMiLVc/ntA8HQ5QivW8zHI/WRdl5DfdQ6EzctH2VUtzZENVa0V+Mnof/cZYnCBiBnq7o\nx/qyo/EjkhE7EGtnyGJtwuBIT2IMWMjBULlzwLVu3GFUZWqn5alGrZvFpKplZDAYNJZuC5umylTw\n8fKswuBYS+LBpNVFC4/2EWvQ5r2Fg4dYbv7LZJJqd96TmZewJs2tszB960nQkyZMYC3HJ40dvO3h\nm/yYoToxaRut1lmrxV4QWhxe9hdSk8Z7xnrwsr+QmjRuhjIIP9OTxs2oiYc2PWnii7ZTM7BNmlZe\n7dqOVpi24jBJQLdfH7t/FF646+LVjdnrO1X/m73inv3a3V1EJElAGc0fyxkZBw5ILMMj1c1gyey+\nydqPXm4ixwMDWVMuuMb7wEXclcrgEfq7nLvHwVS66k6/yCciMXu5Qa8WnwAAAABJRU5ErkJggg==\n",
+       "prompt_number": 238,
+       "text": [
+        "   3      \n",
+        "2\u22c5x       \n",
+        "\u2500\u2500\u2500\u2500 + 3\u22c5x\n",
+        " 3        "
+       ]
+      }
+     ],
+     "prompt_number": 238
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Multiple integrals can be taken by passing multiple symbols after the expression in the constructor.  In this case, `doit()` will find the entire indefinite integral."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "I = Integral(expression, x, y)\n",
+      "I"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\iint 2 x^{2} + 3\\, dx\\, dy$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAJwAAAAvBAMAAADkyL6lAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAmYkQq+9E3XYiMrvN\nZlRfnEjBAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADNUlEQVRIDbWVvWtTURjGn+S2N19tb4qLUIdY\nlapLQ9E5oQ5WFDqIVUFpHIRu7eBQQeitVRGXhiI4Nn+AkAx+gWLr5GCgdXISI+IggqmN1lpr4rnv\neW9yYmrOhYsZzvN+/N4n99xP4L/8Av1Jx5fF91/sP5p2PFj82hkbIVt4sPh1Q3iNLFh824XSZMHi\n227RJgsW33bzObJg8W23JB1YfNttSwcWv3bRr+TAorgF+3Ypmdcw/JtIFmXqEE4pmdcwtkUkizJ1\nFfmsknoMLXkXsyhDY1jMKKnHMD9FIEvTUDnZlHpK3qUJY4n0Ps3Vx6brkQwW+p/LwHwYb7SaEoza\n1GE5guCGSwaVGacWiaO8KptWSSqtTcl4hmosx4AzLvnaDYwsReEqrClZm0y6PaFqYtSow4KzwGhO\nombC5KjHpoo5htQyRRiQ0pr0fKcaC1aSdbv7Xz7zMbCdAN3NvlDt1CT4izosTjyTNG6fmDiI8VqN\nhxp2NBkZvlOFZMQJdZKh3YicJrhrXRURm+sYwhv7Gls54tpFB+JOejkbq9QZShIf3ZewVXUIsIgo\nVMA+DCY/UVkurh1wICe+AhcRWHYZSiKlPYgViF38qYqI+4AkXlHRXRp2nWJLgQpCCZehxMA5WDbR\n5TVVgHDayTepSEuwWHx5oVgU24xkERN76SwglXEZmZgV5HNEDy6rArx3pqJbMKgsFz46q4KYeP2k\nEiiLg5OMTMTmb0p0ic4uWBCNI5z9IL5qc6124khC4tSkSnjW4zIyiaXxQPLjJVIW3Ovfe9ysxtYi\nq6123aso20CX3X0l6DKUIFAw5Vvzr4cCK7XaD2Nk7vpbxa1+o1zqfSTKxsjhu7dchhIYw7Pyipry\noWBRPZS4cWWVYnMozp7zC39TheLWxVR33tqG+ArQtQY65J5ZdkK91KbxRGIh+aVg8TK6EzMxm5Pl\nf34pdprS1/IFYlj0vIaYTxDAooH17dEMMSx6XkPMyD6LBta3tyXCoufbE9FN6rO0Zz10u+Vtx+Jh\noD3SMUV9lvash66VIIjFw0B7ZDJLfZb2rLY7gJMOw6LFdcDj6HkHYdHR2v7CjZzDsGhxDfAHVijm\ng+m4IAYAAAAASUVORK5CYII=\n",
+       "prompt_number": 245,
+       "text": [
+        "\u2320 \u2320                 \n",
+        "\u23ae \u23ae \u239b   2    \u239e      \n",
+        "\u23ae \u23ae \u239d2\u22c5x  + 3\u23a0 dx dy\n",
+        "\u2321 \u2321                 "
+       ]
+      }
+     ],
+     "prompt_number": 245
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "I.doit().expand()"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{2 y}{3} x^{3} + 3 x y$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGgAAAAqBAMAAACtogP1AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIpm7MhCriUTv3c12\nVGZoascqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACb0lEQVRIDZ1UP2gTURz+LpdLLn8uSbuogxIa\ncYlgoCIOSoKLo29qKQQaJwcdgmKDEtrgJhRSUEHRIejgYMGgm3E4C20RAomDg1NvdigRPBBtjC/J\ne3mXeLnr9Tfkvvf9eb+Xd+8dMJs6D6+lFLBW8RoKEIQ2vIZCNQR+eg1FzCOEaJOwqdzWcYJ46lct\nBrUNtDxl8AonfXXMewr5MiAhHQeeQjvUXSV+sYXlFde/pyUxgzSio5flM2hvl7oCfMIFyAXu8xVj\nHY6nPKXXpTM1pFA1hIFui3NFer1eDQvlcwnhW8oJ7IjSQs1/FHiApNKd9gRFh4G68svCTm7ELLS/\nFpnBsC7rFtbfHQ4UtuRWG78tMoNq87Qgl3ISm1fTh+zDivJH6LYonIg9GQo8BNvl8XB+5/iu7i+v\nsGWJUCQJpXl9vYzFs5DYlCykFGOb4Tqfgc6vM3z1JbCI7/obFL8h2hEOioIkaGqsS18YhRB8jLtY\nI1+kdhpyBvTd8oKCSMY6iwjhGSF4D+p4gbhu9VBsIYKNxofnjUaSsjNAto3B5VFNXMtRylqUIGLM\nO/UIsgbo5VFAj+VnYegjjbQQtQk9At4mvtIN2IZcoDdirKrtLE5ZGN5pH9qB2pU7kgFfRp04UQvN\n/KphE1LnUhXl1vbuPt2JG1s/ho5jpcsWq4C8k2AoYpdNSmLPGBPYQP2fvYnlykCNdhGvDZD7zyYu\nDU3qUyzX3f0Dx/pWbuS0X95Itgfv7Gkn1n8/6SRP0+7lpikOfGj8Yjk4uSQlILNPCafcn3ET8sSB\ncg+FMgizA+Vu5o6YgT2dDw79fDB38dDevvEfraab0xjkHkMAAAAASUVORK5CYII=\n",
+       "prompt_number": 247,
+       "text": [
+        "   3          \n",
+        "2\u22c5x \u22c5y        \n",
+        "\u2500\u2500\u2500\u2500\u2500\u2500 + 3\u22c5x\u22c5y\n",
+        "  3           "
+       ]
+      }
+     ],
+     "prompt_number": 247
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "from sympy.integrals.manualintegrate import integral_steps\n",
+      "integral_steps(exp(x) / (1 + exp(2 * x)), x)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\begin{pmatrix}u, & e^{x}, & 1, & \\begin{pmatrix}\\frac{1}{u^{2} + 1}, & u\\end{pmatrix}, & \\frac{e^{x}}{e^{2 x} + 1}, & x\\end{pmatrix}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAWkAAAAmBAMAAAD0LHdwAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAZnbNRO8QMquZIt27\nVInfsDh2AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAE30lEQVRYCdVXTYgcRRR+0zPT8/+DonhRete/\nzWUzupCDp754cYVdNZhTpAwKG5DMXHIQhJlMEBQhzE0xi3TECKIw0UtOkjp4EBGci6jkkMmAYC6y\noqxgDvG96u7p+unu2Z1ZsuwjW/Xe932v3quemp4KAECmicNRsa2w0cdD5yjMuZbfZe7Vo9DttMcV\n33uzM0UOwnnnIBZJWSPrn+f3UyT7p97+YP85ckZ5daknx4Zf3iWoIEaDnBu4OXemSKzl+Dh9hfeI\nzg7SRXthC26kmtG1FSnjPcuJx6dol6E79Kbx3I58lmd0neulV6lX3VG6Iusgfzldsyf2hKSa0TXc\nlrS6e27ZKT4wmfF2yGxi2st6qhxPPlwx1pBb9LUlR8qZ1XWFSWLVtU/YPRWJi8r/AJT/jWMCzGIX\nK67Gf2V+e4dM0szq2hpIYtUt9pdUID56DX/Od+IpgRbgGZ196yOz6zuyaFbX5eSCeVdeKNG/CFC6\nlsgS8Z/BWmbXp2XRz3IQ538dBwqs0QGWSEbEcYAKj0LTK+wUdNDsWnnjf3Gjr2do8bYWR2F1tJdz\nDbc8aNAxs+84cJVF6eTZk2PesH6trqIAZtfiS63LzDgs8qRJBYjdX07kkDiz8tmqg3N3BA2aS7VN\nwOeu2LpXHm89MXlKATEwuy61dE1sHBbZYLH0TNAeZ76pUKl2k/4BXMHCP6pp5dNwtqNCfmR2XeVx\nOgMLi3RjlzXkBlBn9d2ahzA+6CF1zfKO/t4uvrT8sJFIgNl1tofwPdN2SB5ZWGToRth+PBuyXOgb\nYzokaBusoL23Gz2hMAez68ogVBX+/CF0Y+agyFBUVHhzxwJRNBiI04zTALpN4i6DtaNqcEPxZnYt\nnrUQV2F9miTfTXwwKJLwrOXc6SKqg2eLIYJdixMC30OVqwciPwZwUGJYWtdZaDNMcPEv5p4dFOl6\nSJsW5E4JY9c1dhwshjw+0LZDum14fjC2/yY3MKsFZz3hK7B/rtutUEZzkUeR+GUUMXmqThSh02gw\nCKDdhE8nj5Dj4p/YtZK/MfoJrhDdaFLjaFuTX/oduMHID+zYkjg7GClw6d27F6Ci/D5am2EO2M+R\ny2mgrlWdXwQeIlZlCKHc0Yt18jgNRv7W8pnboiX8YuR7JPEt54WeMsfAL8iCHO0h9wdUcPeMCE6D\neOqKjlC0bTGaDOX6vzKcFIn50HWhKn3YGVKbFgOHH4MvPolTvcHOg/3xOUI4DaKqqiMY4Fkxqgxe\nrCl3/F2NSE5DYj7cYlDfJIlvr4eOOpuwrdb8BPWfr8MKVO7dpVROA1XVdASDLU6XytDFmnIvrD5N\nEk5DUj7A7wA16YiqvVCqMBPWnv55kl2CvlAX19ZeWcMLLlXVdILP9GhSGe1izUmRlA/4wgP7L5Is\nZsUR5p+EU51gGU4zVY2zSqiSyLwbBfKuI1T2qGPsfFGzW7jC9dquEyzEaU66Zz8WiORJu1hz4pJ2\nDQW684sXEckWsN8w99dHL7nBEhznpHt2mUjdtIs1Jz5p11CnZ9QekWYxq6lr8JTVSiyG1C7WlJ+0\na4B8E2n8ETxoGyy4IE/N9z+EU6mawyDTd+3/v/PBw2hs/poZ/2xUnfmXOITMq54oal8/hNpzl7S/\nDVK/9OZe4/4nVptBzXLn/hefu+IblPk/0awxCKNqS7kAAAAASUVORK5CYII=\n",
+       "prompt_number": 21,
+       "text": [
+        "\u239b                           x      \u239e\n",
+        "\u239c    x     \u239b  1      \u239e     \u212f       \u239f\n",
+        "\u239cu, \u212f , 1, \u239c\u2500\u2500\u2500\u2500\u2500\u2500, u\u239f, \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500, x\u239f\n",
+        "\u239c          \u239c 2       \u239f   2\u22c5x       \u239f\n",
+        "\u239d          \u239du  + 1   \u23a0  \u212f    + 1   \u23a0"
+       ]
+      }
+     ],
+     "prompt_number": 21
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h2>Limits</h2>\n",
+      "the method `limit` can calculate limits with infinity (using oo).  Though you can use `subs` and oo together, it cannot evaluate the rate of growth as seen below."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = x / (x**2 + 2)\n",
+      "expression.subs('x',oo)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\mathrm{NaN}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAACkAAAAOBAMAAABA5yhLAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAMqvN3RC775lmVEQi\niXYxmxqHAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAt0lEQVQYGWMQsndlYEj/3sAAAgiO2CcGBlYD\nsCADA5wjqb+AgaEBKgrnSIaXIonCOJLc35BEYRxJhv4JIBPmvX3AwADjABksf4CiXD4MTSBRMAfE\nYPwMEi1k2B8A44BEGe4/AJrA+Lb/AJwDYrD8aWBgNTsgLwDjgNXyfGlgYHZgkBcNACoBccCiDO8T\nGOIvMKyXFgCKgjgMDGuBmDmBgT2B4b5kAJTDIPbfCqirgYFH412cHYwDAIgFPBinUTPnAAAAAElF\nTkSuQmCC\n",
+       "prompt_number": 202,
+       "text": [
+        "nan"
+       ]
+      }
+     ],
+     "prompt_number": 202
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.limit(x, oo)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$0$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAOBAMAAADkjZCYAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEJmJdjLNVN0iZu+7\nq0QgoRR7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAVklEQVQIHWNgEDJRZWBgSGeQmMDAtYGBOYGB\n5wID+0cG/gsMfN8Z5BUY+L4wzDdgYP0MJeUNQCL8Cgzs3xk4DjBwfWRg2cDAlMDA0M4gHcDAIOxy\nlQEA9FISlFfRJtkAAAAASUVORK5CYII=\n",
+       "prompt_number": 205,
+       "text": [
+        "0"
+       ]
+      }
+     ],
+     "prompt_number": 205
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "One-sided limits can also be found by passing '+' or '-' as a third argument."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = 1 / x\n",
+      "expression.limit(x, 0, \"+\"), expression.limit(x, 0, \"-\")"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\begin{pmatrix}\\infty, & -\\infty\\end{pmatrix}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAGIAAAAaBAMAAAC++pSRAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAMkS7zRCZdiKJ71Rm\nq90icBAQAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABkElEQVQ4EZVSO0vDUBg9aZumjyDFzan9A2JF\ncNBBnUXpUDopdvAxFTuJuhhwc7EgiJvFSYvQ7g7GQVDBqYOgk6COSrUFqQ6eGx81vWloDuQ+ziP3\ny3cDoBfdIy+sSrL7APqFN5DykAibNC95CACPQKjhKbEChLOeEttApOIp0WMibn14a3DMq4K1hmAS\nV2J92zSBnVxeCA6YLR+z/OEbSloR85z8Ma2OdAV9Dm5BDWJjXJ2EUgB8DQyROQNOkxOAbghdgh5D\n9C0QAy543zVM0cBqwqIuiKcFdfqZeIhppPZZF3RexiueuBL1j5k/C05tEAn/JwcuQh+/Z2Ckxg6Y\nbd7vrZUos6oZ6wxR1TnjeyUDmuGY0FPA2tYhsMrveEeVpiCwi/gBLqHWnTJZ/hlKM6EXrF6t06Iu\nVitQl0tkXvg+CZncKJBpHlHQixiwLH+Dz5D8JGx3HknYLGygKwJ5BFnKP7AdrphLQSnaHKZtJ2+u\nSd3JtAtzTy3tokuSaDCiWYnvTGxa0klng6QsSEwXxBc6FlJKMT0zzAAAAABJRU5ErkJggg==\n",
+       "prompt_number": 208,
+       "text": [
+        "(\u221e, -\u221e)"
+       ]
+      }
+     ],
+     "prompt_number": 208
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h2>Series Expansion</h2>\n",
+      "the method `series(x, x0, n)` returns a taylor series centered at $x_0$ expanded $n$ times.  Below is the six term macclauren series expansion of the sine function.  The order term can be removed using the `removeO()` method."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = sin(x)\n",
+      "expression.series(x, 0, 6)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x - \\frac{x^{3}}{6} + \\frac{x^{5}}{120} + \\mathcal{O}\\left(x^{6}\\right)$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAANEAAAAwBAMAAAB9DIL7AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAEJUlEQVRYCb1WX2gcRRj/zbp7/3LbbFMQihCu\nCdSn1LMUFCvtvkiFgjl8EmrJeYVUwdJ7Up8MiKAixdZSNCj0hL4oSgM+Fsy+6GvOFgJSrfbNisq1\nNW0SWs5vZnfuZi8zk71EHLjZ7/v9vu/73czNfLeAeTROBCay/OyRpokbHveb/oIpy+veNVFbwP16\nvmNK8742LteUYsX9sybaq5mYreHjkSnPuzr1Xy5q7GOTEFhYWjCSWyDMJwJg/2yhoDGlvG6iRkK2\nYuKGx8cj974pqxC6t03c8HghzN80ZeWCXNvEDYWPTT63t1JunAg1WYLD7LKGGh5i9fw7hbP6PBun\nz7ChtDe3S6E+wsbpM2woQ9F4W2ycvubs43o8RkcrZtbGabKKtRc0aA9aihD0nAHDximh3yf2JMbg\nKHjKLAVPwDEo2Ti1SFnu/x+EelWVUuyZ1iKOKL5q2jg1rii/6frEj8BJlVLsXRNjJ5uKr5o2Dji+\n89W1mgi/miS5D/ESUJC6aqnt2E712Mu/iobYa1ZsHaM1OO3tlNXk7vduwlnjRL9ZrWC0CbejidZB\nLNShPUzSfnWctq7L8R0tyX7C14T3pLvJs1SxBkh6JrhOcRcDmpb4JMYxfElPTmQZspQhVtJn0KKI\nRR71Np/EyC/T2cM++sS9OUZNsyxl4BPaeyD47/j8E33YxIEXGwICZgJk6s3ZlPz4z/EvXvwKfR7F\nW5UPEiVqLJl6czalkQ4vWxan/DxZr+B0cClRmq6h15t3v8/H55zp9kccKJVG+4SwRGkgoYtiTfFL\n4hlKDPBZnE7zdIumzXpzbn7+01vz8+1eVtro04+I32k65DxfE3BHzHyiNdGBtPTtJFKuKXEHHwmd\n4+/q7IJghVL5AW1ZPJZCZOrN2ZRYtwkc5V8eOEifL5wO9ghPnL1MvTmbEubuXjp+IC5N98dbH+m4\npC0G3S97b07iMip5i6s/Jxn8/uzfs/fNxLX1iFzjdRnVO1wcOAe4v1yJwJanIhmg+SI74k2UEbC8\n4l8Q1zyJ9OQm4Cid5F3IraDYYu/KOn1aIvDrPZMbLL7UKSxxinVxzQepx65RypPA37yxvTbIKn75\nN8UB8tWUqzpzoer1bYeUfgcOR98Cl4M+vsF6JoUUopSrOqJNqkBicyX6Wzgc0d2ZaWkCJLRbGuL5\nRspLOWs/TA38pjHNlWh8tPMhKVWErZ9KbQV3FxQnbbK1Jvjr04YRK3n33HvUXOobaAX4SrF98z6z\nboAbOjpWKixsrqQIWc1VYK6miYiVroPRmqy7p8nVQ7dIqamhhJJTBeh3utzSBAwN0dkzr+kbuOGH\nFKDb3qGV6K7c0CXxNZXbcEJqofxdYftjpM6MZ+/52VNPo9Bif25fhlc4dS3SFPIPrT6Fi93uKlhj\nUhegyfnfoX8BR7YAT9BoQjMAAAAASUVORK5CYII=\n",
+       "prompt_number": 213,
+       "text": [
+        "     3     5        \n",
+        "    x     x     \u239b 6\u239e\n",
+        "x - \u2500\u2500 + \u2500\u2500\u2500 + O\u239dx \u23a0\n",
+        "    6    120        "
+       ]
+      }
+     ],
+     "prompt_number": 213
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h1>Statistics</h1>\n",
+      "<p>The SymPy stats module expands our CAS with a random variable object.  But we can also use expressions to define probability densities of various r.v.'s</p>"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x, u, s = symbols('x mu sigma')\n",
+      "expression = (1 / (s * sqrt(2 * pi))) * exp(-((x - u)**2/(sqrt(2) * s)**2))\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\frac{\\sqrt{2}}{2 \\sqrt{\\pi} \\sigma} e^{- \\frac{\\left(- \\mu + x\\right)^{2}}{2 \\sigma^{2}}}$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAIsAAAA0BAMAAABIq9ZsAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAInarRM2ZVBDdiWbv\nuzJCz3LGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADJUlEQVRIDaVWS2gTQRj+kuwmm7apsYKICH2I\nIK1IoILPQy4eRMQIHjx4SKu0B197UehBXJQK9mIED1IQgzcrYqg3vXgTPLXgVSkIFUWhoEgtaPxn\ndyY7s7ObZjdzyH7f9z92ZnYy/w8oY6DJxpqiJSAHEsToIamKriVQsnaCID3kni5tqvQvLAd9poHt\nVz4F1fa8gBMBB6sGq4SX5YDcnpq476gePQ1kHPS9VdVN2UzAg7amr4bMv4Ds0dyKLPdwMgxYZ2QD\n4THAXI9Kc1JxznKWAe44vsUoE665PL/uyxIqSRgQaYyGNTHnW/bRwUsPufx03Zd9lKpynC4XCLE0\nA09fAUv55h9uAVK3fwF5jz5uqTIwhjgziz+QHT88fhD2Kdoher00rL/Aa5dnlyTZh702rKmpqWn0\nYZFUd1EjBNQ0uFbEIzdotx8qI6PB2XGctb009Q85WpTsBAxWe+tMyVWxVbV4jM6lN56NjJa9NEdH\n9wNC5tbMet5hcBWgsxAyhL93SsSXypVV1/6NG0xIzS9cqKkWzgb4s+I+Lc5EOk6B8+cYNOnyC09j\nlFuuEtgrYRfeqgYVj9/8SMOBe7tG/az5oWbRx52gJSN81p3ESj4VK/xPI7m0g99e8GnnuppNazGz\nHe/C3MiENjGxGOuQZooQjAfYqZtoMdeb87i7o67bQpVdtnVVN8wWcyW6DJ4o5yvqKLASfGxxzNHS\n0GJMx9R1zbEl/GwhCdBiTGyThE3hRpgHLcZ4Xg+zRGnv6WKNsrXTB72dEi57YOkfXBjbPAN9SXry\nTRtn1SQV7S76Erlod9GXyEWbim/SIRft6aRJlKJNfUk3QxRt6kvS7ItXYV1uNn/HTSmKNm3Nwpfh\nRSpTXy/OLHd8m4jXiaI9hn67p0glzHqH3jVh7fTJirZbPdjWFEC3UbYCI/ZFy4p2qy/5zJqcLbRJ\ncWfDirbfl1wCTWNwBWap08Vwv1VWtEVfQkWDGh1qLb878dLwos37knQNdDsU7NTDeFlE0eZ9SaGB\nI/SlJkdjTka8VPQlgid88r4kYbQf5vUlPk+IovqSmOni9iVq+v8RVuYGHnhB5AAAAABJRU5ErkJg\ngg==\n",
+       "prompt_number": 179,
+       "text": [
+        "                2 \n",
+        "       -(-\u03bc + x)  \n",
+        "       \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n",
+        "              2   \n",
+        "  ___      2\u22c5\u03c3    \n",
+        "\u2572\u2571 2 \u22c5\u212f           \n",
+        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n",
+        "        ___       \n",
+        "    2\u22c5\u2572\u2571 \u03c0 \u22c5\u03c3     "
+       ]
+      }
+     ],
+     "prompt_number": 179
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression.subs([('mu', 0),('sigma', 1)]).integrate(('x',0.2,oo)).evalf(10)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$0.4207402906$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAHYAAAAPBAMAAADDpCYrAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEJmJdjLNVN0iZu+7\nq0QgoRR7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAACGklEQVQoFaWSS2sTURiGn5OZJM3kiooIRRJa\nFIQoQxNcCYoWQaQw6A9oREUohQ66lgZciJDi4MrLQvcujAvx1sWAuFOIoCBCMQv3dWy1WmvGb87p\n4A/wrGae9zzf+c4FdrT3YcYZuNV8jSbZpclWS7AwNXncozDxxkuSAyaG1gn5v8SewLg91ICjQ02c\nOI7/CO5Bzlc32Is1Qr3gXmCE3cNMB6eP1ZFJYC9TrlHsa5KRegPNeAiHeQcvKfcph0Y4TymkNCAf\naffuPMUu5e+aWGBJU8J4C4u1Z/DZq3awIh07vxKlOqCyoV13nlwkbkq+CBWGtL7qL9TErYfYIx2X\n+olSb1BZTz6cQObBWJSS0DD1TdxjktysFWXdTR1XL7YPwX2X7Jok7EK7q+42sR4YVpB01oXKGtZX\ncus6rs9R9P+5rnF7KalLvYSl7lgIF7iyadyIzGPqruk572k3E6bkJGimZN2k56bUcqbPbmih2sUZ\nUW2QT85qJ9qdkdMzpJcy2e+ijy03JqMc6Vh27mwirTjJHV1dWfn9nnyDO4YoOV7DpMijGpcpBDIt\nN9CxnLOsa/eRF6LHsn6CpwzJynIyhJ2G/WQb2IHznNlAx/IkMnJN1xn31I9k3haFa62DXU3IG3dL\nbs1XT7jdmvqIfU7NGYFXjPuyqekPsCTqkfhTTl5x15DC06ScMFR7xmMhjn/CVHO4LVgTYv3H+Asm\nYr/Ec/eQpAAAAABJRU5ErkJggg==\n",
+       "prompt_number": 188,
+       "text": [
+        "0.4207402906"
+       ]
+      }
+     ],
+     "prompt_number": 188
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "from sympy.stats import Normal, P, variance, E"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 190
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x = Normal('x', 0, 1)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 191
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = x + 2*y\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$2 y + x$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAADkAAAASBAMAAAATXWtDAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAIpm7MhCriUTv3c12\nVGZoascqAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA+0lEQVQoFWNgVDJ2YMAJwhjYf+CUZEhlYJiJ\nLBuIzGGYxcCQ74AkcgeJzcCwPwCfLFDp+oBwHQbGqRBNML0xxySOHwAKcXxnKLjJwPMBRZa1gG8N\n1wagEJcB4wVtBmYDFFn2APavvAJAIWUGVoY5DPwHUGRZGbjBynkSgIZ/ZfB3AMpW7969cvfuTWB1\nEOWXGBgFmDYwnAQLMTDAXAVSHsDAosDAI8CcwGCGKssbcJ6BJ4BBqrwoi4HJgOMfqmz/BXsGOWBo\n/P//i4E1/dBHVNmwMzF1D6BCDAxAmyEAbi9ciiGbIb4ByutDiMJYaxhsYEwsdM8hByyiDAwA0qg9\nomX73LEAAAAASUVORK5CYII=\n",
+       "prompt_number": 194,
+       "text": [
+        "2\u22c5y + x"
+       ]
+      }
+     ],
+     "prompt_number": 194
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "variance(expression)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$1$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAPBAMAAAArJJMAAAAAJFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAADHJj5lAAAAC3RSTlMAzRAiu5mrdu/dZmiL4QAAAAAJcEhZcwAA\nDsQAAA7EAZUrDhsAAAAjSURBVAgdY2BgEGJgYDDZxMCgEgYkGNhJJVgzdmYB9TEwAACPpQrvlUCH\ncAAAAABJRU5ErkJggg==\n",
+       "prompt_number": 196,
+       "text": [
+        "1"
+       ]
+      }
+     ],
+     "prompt_number": 196
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h1>Matrices</h1>\n",
+      "A matrix is initalized by providing a list of row vectors to the `Matrix()` constructor.\n",
+      "Unlike symbol objects, matrix objects are fully mutable.  This means that they cannot be used as keys to a dictionary or inside other sympy expressions.  There is an immutable version of the matrix class called ImmutableMatrix strictly for this purpose."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "m = Matrix([[4, -2],[-3, 9],[4, 1]])\n",
+      "m"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left[\\begin{matrix}4 & -2\\\\-3 & 9\\\\4 & 1\\end{matrix}\\right]$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAFoAAABLCAMAAADH/GAOAAAAPFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAo1xBWAAAAE3RSTlMA\nMquZdlQQQOkwRN277yJmzYlst1IWYAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAnVJREFUWAntmemS\npCAMgBGQ6WkFYXn/d10ODyacsXpra6rkTwOGr0OAGCKZbCiUfKwskUjIZBl3Zf4YmWyeR61HT5+j\nXqStip7YJTVYU4yt66lmHb2sg8BTTPjVMva9d1TRXKLRVHiolB202jQaLRcPpcfK1bQ2BI/W1qvd\nQ2/qBjoaYgl/4OplrQUnd9Fva+JfVND+Kd4gAXltrKLWs9+bfbTQy1n0vp3ZtfgltAhT6qP3iac/\nPHFEJfRMfbGSOovjyuxPsFJxUAkdn+CPDIm+gXfR9rLaoOpqMcYwGg6OG1LT2qzW0m2QuYvp6KV7\naBy0KF3TuiiM63zQwF6PQR6DAAuAZnuHKOdv1n7AJpjhbPd3F7+JVt79zrbnpYR0EkpCdhPNrdfY\nHq7sUuhnjYaghkIn3ES/pQuyhNU/SVkrCpgjSDieN9FBqGsQEV8a/Az2dnYfrbsRqwzTMnBNOujJ\nLF2yC069ntqCt3QH7YYYeUbM+0yzH+2gc1vrUszio9oQ3GbApMNdMCYTtlPa6Sbz9fpOepJqjChW\nOCaRSKoU7pA/r8ZdxgbpFa5PwkuqOgmcQnfT1jHKWSw8ZwnQVzd/EKdMqone/BGf4coDMCFcCyJ0\n5g6aaPJm7k51XHsy5NlhilJt9Dn4TuVBA6s9BnkMAiwAmv9lh+CyOM5DwVLX+rpswzF5W63wPeBk\nqmhEFkesLHvFNNDILA5HaI3M4iDQ2CzOOBqdxRlHo7M4w+jBLE6yCUfRN7I4o+gbWZxRdJwoKouD\nQ6OyOBg0KovDqLRLlvOp+pBk+W9WHzQw3G82yD/75CP8BxrO+yE6MGa9GT75cE7+AoiaIgnZF/iG\nAAAAAElFTkSuQmCC\n",
+       "prompt_number": 248,
+       "text": [
+        "\u23a14   -2\u23a4\n",
+        "\u23a2      \u23a5\n",
+        "\u23a2-3  9 \u23a5\n",
+        "\u23a2      \u23a5\n",
+        "\u23a34   1 \u23a6"
+       ]
+      }
+     ],
+     "prompt_number": 248
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "If you only pass a single list, the matrix is assumed to be a column vector"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "m = Matrix([4, 3, 2, 1])\n",
+      "m"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left[\\begin{matrix}4\\\\3\\\\2\\\\1\\end{matrix}\\right]$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAABoAAABkCAMAAACvvNBNAAAAP1BMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADFBd4eAAAAFHRS\nTlMAMquZdlQQQO0wRN277yJmzYl8bJLH2J4AAAAJcEhZcwAADsQAAA7EAZUrDhsAAAGNSURBVEgN\n7ZbbbsMgDIYdILQLh4TN7/+swzYhdQtSryZNKjel/jCYP8YAC3Iz0FsQC8CC1tW2dgI7/TdIaLms\nV29/QYtt9BWFOEMuzVDejxkqMEN7niHvYIZKDW484UpbHyJPTmO0GmqYTF2xtlc1plsGwOmWI6LZ\nJxOyebzWB53Zm0sp8Uxw9VEyJe6Koq7+Xg7JA4PIqLy2tAF4PAaITeMJGR2Tk7KUcBIdBnuV1Lai\nwpDlU/LcIXTDmxhzpt/IWwD4fjywiDQ+tj2rCSU7A7KzDmMniVaUvNYINmttrIpwUxM2279C3ome\nOnbIdetv18Pu+7YauUoYz3xVXp6KdsGmr0KGI01JllMocd6aVsAVOjgBhkgmCjxgVL425No3QvM6\nb8/Cxmlzu391ddx1H/3clbwrHQZJ4qdkk6vGDVI0h3rMrRkd2EMuuxHqwXBHCfVBj3WD1Dj60XgS\nKseWM3WQQj5aM0F1qPug/sSyJmFo97zWkJS/mpL3MlPv79H0VenpDenceStQcGKBX1KjIcAQsYNI\nAAAAAElFTkSuQmCC\n",
+       "prompt_number": 249,
+       "text": [
+        "\u23a14\u23a4\n",
+        "\u23a2 \u23a5\n",
+        "\u23a23\u23a5\n",
+        "\u23a2 \u23a5\n",
+        "\u23a22\u23a5\n",
+        "\u23a2 \u23a5\n",
+        "\u23a31\u23a6"
+       ]
+      }
+     ],
+     "prompt_number": 249
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "matrix objects are manipulated just like any other object in python"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "M = Matrix([[2, 3],[4, 4]])\n",
+      "N = Matrix([[3, 2],[9, -1]])"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 250
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "M + N"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left[\\begin{matrix}5 & 5\\\\13 & 3\\end{matrix}\\right]$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAyBAMAAAAercAnAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMA74lUMhDNdplEqyJm\nu91CXIoXAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABiklEQVQ4Ee3Vv0tCURQH8O9LfaFPk+gHRITk\nGJT2F2hh+xvaa2x0CYIGpcmC0Lb+gmhLmgSX9wc4BC21ZFNES5RURNHrvt49vXMeiA0NDd1B7/2e\nj/fIEXzIuI/ou3LuA8ZKK33rWC0tYrx/2assaWBuRnel1AkBw3XLEuiEgDm3LevQCYFEqAzo5Oeg\ns1WUlyT8hG5I2darBDohoIpXEuiEgXozLLyEwBGQawigEwKTQN0WQCcEqsCNqEMnBFpITkugEwLW\nzrHsAJ0QkJ9mp3/gD+PX5mCqH+I0e85GDCs7n1dnv4XVtWFVUXCYaCHyTiB2cWJjuIf0NQOVPD4I\nABUb8SmsrTNw0Ig9C6AOogVYi68bFNhgF6itWVUveg6qBaILXhCs5VtvzwAwWwzKajfk/bcIYEwI\ngFF1bwCsJlI9BtpAV00qAOknpLzJ0HJtdB0OjDOMvFFVvc8A900Okg4KZQY6iLyoo99iL3Pn4LB2\nyeqI1/Yb34AXQnv9JUMpO/4NMPBxMOiB8gkKOGvJcJirDgAAAABJRU5ErkJggg==\n",
+       "prompt_number": 252,
+       "text": [
+        "\u23a15   5\u23a4\n",
+        "\u23a2     \u23a5\n",
+        "\u23a313  3\u23a6"
+       ]
+      }
+     ],
+     "prompt_number": 252
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "M * N"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left[\\begin{matrix}33 & 1\\\\48 & 4\\end{matrix}\\right]$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAyBAMAAAAercAnAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMA74lUMhAiu5lmdt1E\nzatYvhcYAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABmElEQVQ4Ee3Vv0vDQBwF8Jf0Z9pqB5UuotVF\nxEEFZ1uhgotSRBC6tLiIW0FwEgxODiKZxEWM/gXdXB0du5Q66liHlFpqKYLxcjW576mhi4vgDa+5\ne5/24NIQTNov8B3zdgsjuVXfHlu5RYz6106zwsHO9D7Ag+qaB8I6MgYP2u92PBBrI1nhQcD2mQCJ\ncRSrPAhATAC2nDHc8IwMHpx1Hj+C4JwO8PBqfNliKssqHh6Rt1DGWMHjJxAuIdLm4bXsgvxCsoNI\nj4cPUMqIv/LwAZqBjMnDB+D+5BD9ECL69NZgs/7dFMvfrv5B/0h+7xzWgMLNqXzQQZ3N3S1uAR3D\nC5KIlwWIpRAwEK5K4JqAvTrUMkIVCsKXBKTrSHTzqkGBOiSAVqoDzd4s7XFOQAEMRO0aBSGTgLQD\nLtZbd0SoECCQZUB7xJXz9LhjiYBNMKDkEWy7LRBKE7BsWa3nIiudv/HnCFhWc8IUJ5mCUgIO3Jp/\nskdJgC4SNWimBJIEzNgNbBzLN0s9emcH594s6at08kfAwNfBoBfKB9F6fzmDSgqCAAAAAElFTkSu\nQmCC\n",
+       "prompt_number": 253,
+       "text": [
+        "\u23a133  1\u23a4\n",
+        "\u23a2     \u23a5\n",
+        "\u23a348  4\u23a6"
+       ]
+      }
+     ],
+     "prompt_number": 253
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Raising a matrix to the $-1$ returns the matrix inverse"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "M**-1"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left[\\begin{matrix}-1 & \\frac{3}{4}\\\\1 & - \\frac{1}{2}\\end{matrix}\\right]$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAFkAAAA0BAMAAAATT4kYAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMA74lUMhDN3SK7mat2\nZkSZHuDOAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABl0lEQVRIDWNgIAR0tAMIKUHIc13gmoDgyf//\nhOBgYXEp8H4ACzP9/y/AIOziikUNshBXApjH6uIswCCCLIGVHegAFWZBU82GxUMxOTAz0FRzzMei\nmgHuS1TVrLP2Y1PN8hmHS85jqg504PhLvGr2Bl5R4lWz6Gg3EK8aqhJEofqSgQGLuzFUs6aXA0GZ\nA3GqEdqxmP0fCD5AVJDjErxmMzBwwuSJMtseFmVoqlfLV1+AGQSnWfVxqIarQGbwxJOi2pkk1Qqk\nqOZtIEV1DAMpqq1WrV8L9TRaCCIHBYLdH8DAMgHEJUY17/zNLKsLiFUNUsdMV9VssAgGWY0GMFyC\nveSB6kJXjaPkwaEaf55EN5uAagGQJcixgyUHQ93BwLH89wHiVUN1EWk2UaoRpRJEOZFmQ0sgIlUT\n5RKoIiClNQuULIg0m6mBOwFVNdaSB6gEBNgbWH4AKWSzweLYCcYHHP+IVw3MPF9JUc1+gBTVWkDF\nxLqbgXcBKaofMTyBmE24xQF0QrLxVAZwi4NQawbkBEZQRQVqzQAAgAtriM+uOlUAAAAASUVORK5C\nYII=\n",
+       "prompt_number": 255,
+       "text": [
+        "\u23a1-1  3/4 \u23a4\n",
+        "\u23a2        \u23a5\n",
+        "\u23a31   -1/2\u23a6"
+       ]
+      }
+     ],
+     "prompt_number": 255
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "<h1>Formal Logic</h1>\n",
+      "SymPy can evaluate and simplify logical sentences using symbols and standard python operators `&`, `|`, and `&`, not is denoted with a tilde `~`."
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "x, y = symbols('x y')\n",
+      "expression = y | (x & y)\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$y \\vee \\left(x \\wedge y\\right)$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAF4AAAAVBAMAAAA9Y0TyAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEImZdiLvVM27RDKr\nZt3KPpNmAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB2klEQVQoFaWTP2gUURDGf3vZzf3Z23WRFCmC\nHkSwUTjQImLhwxxWQq7yHwgnWFkdCJayIiKkukILMWqKNDbmWkFIsBJtrrBIGSFga0AbRfCbl3i7\nCWflHG+++b6ZN2/ePg7+3+LRP3okw4mJ6xNVEz8VGb819vxBoUK3TGoF8Vs/Gw9bhQoPy6SUemf6\nF3PT5Zbxy8y0fQt6fyNqqmq0jb4Zawqaa65MHxPMO66oR1W1de2Bea2ZyzcuOiGzbBtw9CzRLctV\nqj2WTNEsbw15AUEr2UlzIyf1M2vdI/wGW1ydynlmSgc+GvIVKlllt+oP2+aaaVF/gfoA7pNNO76b\ndIwgN+SO+lNTUpY4mkNhwG2OONiA9Sz+ZampfmVkaPX4pCDNiDeNN3bZ0EbVLxD2TIny1MDPo8SQ\nTPFdrUcmaupLAn27FeqbpvDcv5a/bzVbIrR6q7U9VrMi2IJzrO/N8dq/FpzSjP1X3FQ6HshpJvUf\nNH4LzsDciQtdRVBre7Az5zozp0dizVW50MkF7xd/CJa1dANvkfWRpXvbLWyYY+i9bkDUo5kHPz0f\nu6Q9DovgA8dX9S6O1NUdB+3pQerZDk+Eszqyc/5wetL/ZW3RpprUSVOODnfY50mXP42KVd+KuSyX\nAAAAAElFTkSuQmCC\n",
+       "prompt_number": 5,
+       "text": [
+        "y \u2228 (x \u2227 y)"
+       ]
+      }
+     ],
+     "prompt_number": 5
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = ~y & x\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x \\wedge \\neg y$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAADwAAAARBAMAAABz4NKpAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA+0lEQVQoFWNgQAAHBBMbay42QbgYzw4BOBsL\ngzlIAYuokLKrGlhckqEBWVrsEgPLQwbGBPYmjgkg8SwgRAIJ6xiYPjCwCbB95HIACTcweIJlb3QA\nQRvLgpsM3BsYGBk4N4BF2RUYmA+AWSDCmZHhEQO/ApAFJhgYOAQYeAxAMmDgzMD6keH8ASAbSIB8\ntBaIpwAxBDgz8E5g0GNg4BLQZ2ACSYOkQEogwJmB24BhMwND/IL9DO5AIR6QC4AWQAEPA+8G1u8M\nDMJKQukFQDHmACDBpACVBVKMZrpfEDxWMPMAQoABZDtuYMkgDzIQF2hi2IRLCiQepHuAgQEAiMoq\nfm7IYcYAAAAASUVORK5CYII=\n",
+       "prompt_number": 14,
+       "text": [
+        "x \u2227 \u00acy"
+       ]
+      }
+     ],
+     "prompt_number": 14
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Implication is denoted with `<<` and `>>`"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = x >> y\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x \\Rightarrow y$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAADcAAAAQBAMAAABAXPr7AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAEHarIkSJZt3NVLsy\nme8Q6PJIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAA1UlEQVQYGWNgIAFswaf2NKqkkLKrmgJciP0C\nmMmYq8DgJ8DAmMDexDEBKMLbAQafwZJsXA8Y9BkY2ATYPnI5gEXABNcsEOXFO4FhNwMDIwPnBoQU\nkCX5FEgI8CkwfAIJ8yuASBhgmeYAYsYL8PwB0ecPMAgAKaidnQ4gMYabDEwPGBi4BPQZmECSEMAK\nchsQbGbgNgDqX7CfwR0iACIloepuM8QXMDAIKwmlAykYsIEyhJPuO8DE4PQBOOsmnIXOYJ7A+BVd\nDM7nUOBWgHPQGaxKd4BCAAZFKFWT1uasAAAAAElFTkSuQmCC\n",
+       "prompt_number": 8,
+       "text": [
+        "x \u2192 y"
+       ]
+      }
+     ],
+     "prompt_number": 8
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "Substitution is treated just like an algebraic expression"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "expression = y >> x\n",
+      "expression.subs(y, True)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$x$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAAsAAAAJBAMAAAAWSsseAAAAKlBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADmU0mKAAAADXRSTlMAEHarIkSJZt3NVLsyNZ302gAA\nAAlwSFlzAAAOxAAADsQBlSsOGwAAAEJJREFUCB1jYBBSdlVTYGBMYG/imMDAJsB2kcuBgZGBcwMD\nCPAqgKmzBxgEGLgEdBmYBBhiF+xlcGdgEFYSSi9gAAAZ4Ql2LUcmxgAAAABJRU5ErkJggg==\n",
+       "prompt_number": 9,
+       "text": [
+        "x"
+       ]
+      }
+     ],
+     "prompt_number": 9
+    },
+    {
+     "cell_type": "markdown",
+     "metadata": {},
+     "source": [
+      "simplification of more complicated sentences comes from the sympy.logic function `simplify_logic`"
+     ]
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "from sympy.logic import simplify_logic\n",
+      "x, y, z = symbols('x, y, z')\n",
+      "expression = (~x & ~y & ~z) | (~x & ~y & z)\n",
+      "expression"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\left(z \\wedge \\neg x \\wedge \\neg y\\right) \\vee \\left(\\neg x \\wedge \\neg y \\wedge \\neg z\\right)$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAARcAAAAVBAMAAACeQrdYAAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAMmYiu80QdonvRN2Z\nVKvu110NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADYklEQVRIDc2WPWhTURTHz8vHS5o0MZRugkYc\nqlsQK1QwBCt0KNSA4CAd3mCpLvUtkgrFli5dqnRRodPbOlRocLCKCBEsDn5lFRziIIiTH1DByf85\n777k3tuEtpk8Jfec87/n/O597933KNF/ZU6xv+2csNv6BSmO8M7a0APm+YJV2C9IYYR3VWPGtdgI\nS0YWJlV2jsSyLx0UVhD1AnbTwUstRY3wyYaW6OG0nqh4nr1cT8xHZIBUSU9gt4XAGyhFjfDDT7VE\nC51JT8tUeJO908KQ9TAYIORivYDddPA2oz7232t61onzG3ztliWbLFzB7zEHBogFtl7Abjp4q2jJ\nPA+GuNWtZtm1bfbu+XnZxQzV2yLKVn0a8yjdYO0zfuMcMEhZu88C3nhD8YdcY+m0ue4UmXcRc9dr\n71pwlG6m5Wo5hrlLse1slaN7+OtYOrdGi0QxmcIjcio8x6DQOn0WcOkTpX5wjaW7EwsfhPcScx6V\nBZOluCww+IJtKe2ld3MlnqnTKDulXxis0iWiXJ21lE/5gAOA9vRFwLfMexZv7lCiwrWmTi7FW8Jb\n50k5hkQjRF84FYu3XEpWJMTbIm+N0r0Bn/6gSS7SrdOM6AJCpPWZwLJLj+iIz8XGQnwjjuEHnjDk\nBBLhXWI1NN5s2Mpvi9oupqBvec7PaDP0npalobOZdp8JLFNml44XuNhYCJvJNCBiM/yYchyHLlmS\nEANvBq0eQj6k/NaIQd+h1BoIdclH1eFmEJvWx9wOsEx4vHe4xNZlAebxucNiLTjuU/tCFm/lvEVK\neQh5I7whMSw2RYlWdIApMeSLHh1grc8ElrlrimttHYvmhXcf9+fJ8u0ANcNc2PnsFbaal+kMJKeC\nQT5s8EQFek1bRRzXBmeUmfTEAxRau88COjRYyfziGnMhh46eGrkmvE2MdBoxvlA8aJ+9udrschFS\nPsCQCq8fEdHcykfcxGSAEDYdOoCURX17gO63hd9cYy/UiD0IhJcFVhkE3AaVaC4jcUFTcGqIxpRw\nLvQaKKoMODCAODWwgAdDZwG8WIODQ1m+6v5Fw4rZdADQV7oVmE16xrxxXThQnPUTPn/SreL9Qds0\nYfVoqfAO/z9RpvYKkERJI3G4P2hjoWD1aKnw4kVNOUR40q7tF6Q44P0DVzTS1ZqpPmQAAAAASUVO\nRK5CYII=\n",
+       "prompt_number": 11,
+       "text": [
+        "(z \u2227 \u00acx \u2227 \u00acy) \u2228 (\u00acx \u2227 \u00acy \u2227 \u00acz)"
+       ]
+      }
+     ],
+     "prompt_number": 11
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [
+      "simplify_logic(expression)"
+     ],
+     "language": "python",
+     "metadata": {},
+     "outputs": [
+      {
+       "latex": [
+        "$$\\neg x \\wedge \\neg y$$"
+       ],
+       "metadata": {},
+       "output_type": "pyout",
+       "png": "iVBORw0KGgoAAAANSUhEUgAAAEkAAAARBAMAAABjgJx1AAAAMFBMVEX///8AAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAv3aB7AAAAD3RSTlMAmd2JIqsyEHZEZs1U\nu+9Zs8H3AAAACXBIWXMAAA7EAAAOxAGVKw4bAAABCUlEQVQoFWNgQAcs6AJY+dwCWIXRBHPV0QSw\nciM7sAqDBdk7QmZYgFjsG5iQVbEbNjD4FcBEihkWNWiDOMwHmA/ABEFcngcM/QwMQkpAoMxgzmBf\ncAQky8TAsgFEM4LElQx8GDcw3AXxgcCVoYBhL4S5goEhDMICkiwBBXwNDD+gfFcgDWUDfZiKpIph\nfgHbN4QqIJsdyOMBhha3A0wZSwCDNAPHAyjXleE4xweGdiAPpAKkEgKAqq4y8AZAeWycf3g/sCwA\n8nJBIohwTWCQZZgPEgcD9oj25lUgViSIQA7XUgt5B5AYCpgA4rGhCEmj8LByWDew/8QqgSLI1MDb\ngCKAlcPZIQYUBwDXmy2FR9Ap9QAAAABJRU5ErkJggg==\n",
+       "prompt_number": 12,
+       "text": [
+        "\u00acx \u2227 \u00acy"
+       ]
+      }
+     ],
+     "prompt_number": 12
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 36
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 36
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 36
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 36
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [],
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 36
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": [],
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    }
+   ],
+   "metadata": {}
+  }
+ ]
+}
