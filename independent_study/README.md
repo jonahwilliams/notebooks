@@ -2,12 +2,12 @@
 
 
 <h3>Support Vector Machines</h3>
-For the first part of the independent study I concentrated my efforts on understanding the math behind the support vector classifier: How do we find an optimal separating hyperplane using the SMO algorithm?
+<p>For the first part of the independent study I concentrated my efforts on understanding the math behind the support vector classifier. What is a kernel function?  It turns out they are much more universal - allowing us to implicitly represent higher dimensional objects for support vector machines - but also allowing us to bring our assumptions about the structure of our data (periodic, smooth) into different modeling approaches.
+</p>
 
-First I go though the basics of Kernel Methods with a linear SVM:
-[Linear SVM](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/SupportVectorMachines.ipynb)
-
-What is a kernel function?  It turns out they are much more universal - allowing us to implicitly represent higher dimensional objects for support vector machines - but also allowing us to bring our assumptions about the structure of our data (periodic, smooth) into different modeling approaches.
+1. [Linear SVM](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/SupportVectorMachines.ipynb)
+2. [Nonlinear SVM](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/KernelMethodsII.ipynb)
+3. [Interactive SVM](http://bl.ocks.org/jonahwilliams/e3eef13a85774df70e18)
 
 Here I go through kernel functions with specific applications to SVM with some of the more common kernels
 [Nonlinear SVM](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/KernelMethodsII.ipynb)
