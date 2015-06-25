@@ -12,10 +12,16 @@
 
 
 <h3>Gaussian Processes</h3>
-Grid search works okay for a low number of dimensions, but it scales extremely poorly.  I took some inspiration from [this paper](http://arxiv.org/pdf/1206.2944.pdf) and developed a small prototype optimizer using Thompson Sampling.
+Grid search works okay for a low number of dimensions, but it scales extremely poorly.  I took some inspiration from [this paper](http://arxiv.org/pdf/1206.2944.pdf) and developed a small prototype optimizer using Thompson Sampling.  Because Gaussian Processes also use kernel functions, I found this particularly enlightning because it introduced a larger variety of kernel functions - periodic kernels seemed especially interesting.
 
-https://github.com/jonahwilliams/notebooks/blob/master/independent_study/BayesianOptimization.ipynb
+1. [Bayesian Optimization](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/BayesianOptimization.ipynb)
 
 
 <h3>Artificial Neural Networks</h3>
-<li>
+The prerequisite knowledge for setting up ANN models is an understanding of the backpropagation algorithm and gradient based optimization ( and a ton of linear algebra).  I made use of Theano, as well as the Keras library which wraps theano into a nice interface for faster prototyping.  There is still a lot to do here, I will most likely continue developing more complicated models with theano in hopes of catching up to current RNN and NTM performance.
+
+1. [Gradient Optimization](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/GradientBasedOptimization.ipynb)
+2. [Backpropagation](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/Backpropagation.ipynb)
+3. [Linear Classification](https://github.com/jonahwilliams/notebooks/blob/master/networks/LinearClassification.ipynb)
+3. [Theano Basics](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/TheanoBasics.ipynb)
+4. [Keras Basics](https://github.com/jonahwilliams/notebooks/blob/master/networks/KerasNet.ipynb)
