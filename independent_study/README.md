@@ -2,23 +2,13 @@
 
 
 <h3>Support Vector Machines</h3>
-<p>For the first part of the independent study I concentrated my efforts on understanding the math behind the support vector classifier. What is a kernel function?  It turns out they are much more universal - allowing us to implicitly represent higher dimensional objects for support vector machines - but also allowing us to bring our assumptions about the structure of our data (periodic, smooth) into different modeling approaches.
+<p>For the first part of the independent study I concentrated my efforts on understanding the math behind the support vector classifier. What is a kernel function?  It turns out they are much more universal - allowing us to implicitly represent higher dimensional objects for support vector machines - but also allowing us to bring our assumptions about the structure of our data (periodic, smooth) into different modeling approaches.  Finally, I researched some extremely basic methods of setting the hyperparameters of the kernel functions using a grid search.
 </p>
 
 1. [Linear SVM](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/SupportVectorMachines.ipynb)
 2. [Nonlinear SVM](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/KernelMethodsII.ipynb)
 3. [Interactive SVM](http://bl.ocks.org/jonahwilliams/e3eef13a85774df70e18)
-
-Here I go through kernel functions with specific applications to SVM with some of the more common kernels
-[Nonlinear SVM](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/KernelMethodsII.ipynb)
-
-Next, I tried grid search methods for picking hyper-parameter settings
-
-[Hyperparameter Selection](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/HyperParameterSelection.ipynb)
-
-Finally, I produced a small interactive visual for SVMs, including an implementation of the SMO algorithm in javascript.  I'd like to expand this to nonlinear kernels, but I have yet to think of a way to make it look nice.
-
-[Interactive SVM](http://bl.ocks.org/jonahwilliams/e3eef13a85774df70e18)
+4. [Hyperparameter Selection](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/HyperParameterSelection.ipynb)
 
 
 <h3>Gaussian Processes</h3>
