@@ -25,6 +25,7 @@ The prerequisite knowledge for setting up ANN models is an understanding of the 
 3. [Linear Classification](https://github.com/jonahwilliams/notebooks/blob/master/networks/LinearClassification.ipynb)
 3. [Theano Basics](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/TheanoBasics.ipynb)
 4. [Keras Basics](https://github.com/jonahwilliams/notebooks/blob/master/networks/KerasNet.ipynb)
+5. [Implementing MLP in Theano](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/MultiLayerPerceptron.ipynb)
 
 <h3>Case Studies</h3>
 1. [Predicting Forest Cover](https://github.com/jonahwilliams/notebooks/blob/master/independent_study/ForestCover.ipynb)
